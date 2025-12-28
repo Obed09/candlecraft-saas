@@ -121,7 +121,7 @@ export default function VesselManager() {
 
   const handleEdit = (vessel: VesselStyle) => {
     setEditingId(vessel.id);
-    setEditForm({ name: vessel.name, description: vessel.description });
+    setEditForm({ name: vessel.name, description: vessel.description || '' });
   };
 
   const handleSave = (vesselId: string) => {
@@ -165,11 +165,15 @@ export default function VesselManager() {
       id: newId,
       name: `Style #${vessels.length + 1}`,
       description: 'New vessel style - click edit to add description',
+      capacity: 8,
+      unit: 'oz',
+      shape: 'cylinder',
+      cost: 0,
       isVisible: true
     };
     setVessels(prev => [...prev, newVessel]);
     setEditingId(newId);
-    setEditForm({ name: newVessel.name, description: newVessel.description });
+    setEditForm({ name: newVessel.name, description: newVessel.description || '' });
   };
 
   const handleImageUpload = async (vesselId: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,16 +260,15 @@ export default function VesselManager() {
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target?.result as string);
-          const success = importVesselData(data);
+          importVesselData(data.vessels || data);
           
-          if (success) {
-            // Reload data
-            setVessels(getVessels());
+          // Reload data
+          setVessels(getVessels());
+          if (data.images) {
+            saveVesselImages(data.images);
             setImages(getVesselImages());
-            alert('Configuration imported successfully!');
-          } else {
-            alert('Failed to import configuration');
           }
+          alert('Configuration imported successfully!');
         } catch (error) {
           console.error('Import error:', error);
           alert('Invalid configuration file');

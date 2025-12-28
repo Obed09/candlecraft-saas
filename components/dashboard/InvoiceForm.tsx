@@ -131,10 +131,11 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
   const handlePreview = () => {
     const invoiceData = {
       invoiceNumber,
-      date: invoiceDate,
-      dueDate,
-      customer: customerName,
+      invoiceDate: new Date(invoiceDate),
+      dueDate: new Date(dueDate),
+      customerName,
       customerEmail: customerAddress,
+      customerAddress,
       items: items.map(item => ({
         description: item.description,
         quantity: item.quantity,
@@ -150,7 +151,7 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
       businessAddress,
       businessEmail,
       businessPhone,
-      businessLogo: showLogo ? businessLogo : undefined
+      logoUrl: showLogo ? businessLogo : undefined
     };
 
     const pdf = generateInvoicePDF(invoiceData);
@@ -160,10 +161,11 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
   const handlePrint = () => {
     const invoiceData = {
       invoiceNumber,
-      date: invoiceDate,
-      dueDate,
-      customer: customerName,
+      invoiceDate: new Date(invoiceDate),
+      dueDate: new Date(dueDate),
+      customerName,
       customerEmail: customerAddress,
+      customerAddress,
       items: items.map(item => ({
         description: item.description,
         quantity: item.quantity,
@@ -179,7 +181,7 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
       businessAddress,
       businessEmail,
       businessPhone,
-      businessLogo: showLogo ? businessLogo : undefined
+      logoUrl: showLogo ? businessLogo : undefined
     };
 
     printInvoice(invoiceData);
@@ -188,10 +190,11 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
   const handleDownloadPDF = () => {
     const invoiceData = {
       invoiceNumber,
-      date: invoiceDate,
-      dueDate,
-      customer: customerName,
+      invoiceDate: new Date(invoiceDate),
+      dueDate: new Date(dueDate),
+      customerName,
       customerEmail: customerAddress,
+      customerAddress,
       items: items.map(item => ({
         description: item.description,
         quantity: item.quantity,
@@ -207,7 +210,7 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
       businessAddress,
       businessEmail,
       businessPhone,
-      businessLogo: showLogo ? businessLogo : undefined
+      logoUrl: showLogo ? businessLogo : undefined
     };
 
     downloadInvoice(invoiceData);

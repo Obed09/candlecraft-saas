@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     if (!business) {
       business = await prisma.business.create({
         data: {
+          name: "Limen Lakay",
           userId,
         },
       });
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
       const product = products[Math.floor(Math.random() * products.length)];
       const quantity = Math.floor(Math.random() * 3) + 1;
       
-      const subtotal = product.retailPrice * quantity;
+      const subtotal = (product.retailPrice || 0) * quantity;
       const tax = subtotal * 0.08;
       const shipping = 8.99;
       const total = subtotal + tax + shipping;
@@ -130,10 +131,9 @@ export async function POST(request: Request) {
           items: {
             create: {
               productName: product.name,
-              productSku: product.sku,
               quantity,
-              unitPrice: product.retailPrice,
-              total: product.retailPrice * quantity,
+              unitPrice: product.retailPrice || 0,
+              total: (product.retailPrice || 0) * quantity,
             },
           },
         },
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
       const product = products[Math.floor(Math.random() * products.length)];
       const quantity = Math.floor(Math.random() * 4) + 1;
       
-      const subtotal = product.retailPrice * quantity;
+      const subtotal = (product.retailPrice || 0) * quantity;
       const tax = subtotal * 0.08;
       const shipping = 8.99;
       const total = subtotal + tax + shipping;
@@ -168,10 +168,9 @@ export async function POST(request: Request) {
           items: {
             create: {
               productName: product.name,
-              productSku: product.sku,
               quantity,
-              unitPrice: product.retailPrice,
-              total: product.retailPrice * quantity,
+              unitPrice: product.retailPrice || 0,
+              total: (product.retailPrice || 0) * quantity,
             },
           },
         },
@@ -186,7 +185,7 @@ export async function POST(request: Request) {
       const product = products[Math.floor(Math.random() * products.length)];
       const quantity = Math.floor(Math.random() * 5) + 1;
       
-      const subtotal = product.retailPrice * quantity;
+      const subtotal = (product.retailPrice || 0) * quantity;
       const tax = subtotal * 0.08;
       const shipping = 8.99;
       const total = subtotal + tax + shipping;
@@ -206,10 +205,9 @@ export async function POST(request: Request) {
           items: {
             create: {
               productName: product.name,
-              productSku: product.sku,
               quantity,
-              unitPrice: product.retailPrice,
-              total: product.retailPrice * quantity,
+              unitPrice: product.retailPrice || 0,
+              total: (product.retailPrice || 0) * quantity,
             },
           },
         },

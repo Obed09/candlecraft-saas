@@ -748,8 +748,8 @@ export default function SettingsPage() {
                         </div>
                         <input
                           type="checkbox"
-                          checked={settings.autoProduction}
-                          onChange={(e) => updateSetting('autoProduction', e.target.checked)}
+                          checked={settings.autoProductionEnabled}
+                          onChange={(e) => updateSetting('autoProductionEnabled', e.target.checked)}
                           className="w-5 h-5 text-purple-600"
                         />
                       </div>
@@ -764,8 +764,8 @@ export default function SettingsPage() {
                         </div>
                         <input
                           type="checkbox"
-                          checked={settings.autoReorder}
-                          onChange={(e) => updateSetting('autoReorder', e.target.checked)}
+                          checked={settings.autoReorderEnabled}
+                          onChange={(e) => updateSetting('autoReorderEnabled', e.target.checked)}
                           className="w-5 h-5 text-purple-600"
                         />
                       </div>
@@ -780,8 +780,8 @@ export default function SettingsPage() {
                         </div>
                         <input
                           type="checkbox"
-                          checked={settings.automationNotifications}
-                          onChange={(e) => updateSetting('automationNotifications', e.target.checked)}
+                          checked={settings.emailNotifications}
+                          onChange={(e) => updateSetting('emailNotifications', e.target.checked)}
                           className="w-5 h-5 text-purple-600"
                         />
                       </div>
