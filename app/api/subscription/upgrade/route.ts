@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/apiMiddleware";
 import { prisma } from "@/lib/prisma";
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
           plan,
           stripePriceId: priceId,
           stripeCurrentPeriodEnd: new Date(
-            stripeSubscription.current_period_end * 1000
+            (stripeSubscription as any).current_period_end * 1000
           ),
         },
       });
