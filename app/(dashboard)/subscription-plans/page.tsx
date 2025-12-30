@@ -31,7 +31,10 @@ export default function SubscriptionPlansPage() {
       ],
       cta: "Get Started Free",
       ctaLink: "/sign-up?plan=free",
-      popular: false
+      popular: false,
+      badge: undefined,
+      spotsLeft: undefined,
+      savings: undefined
     },
     {
       name: "Starter",
@@ -91,7 +94,10 @@ export default function SubscriptionPlansPage() {
       ],
       cta: "Start 14-Day Trial",
       ctaLink: "/sign-up?plan=pro",
-      popular: false
+      popular: false,
+      badge: undefined,
+      spotsLeft: undefined,
+      savings: undefined
     },
     {
       name: "Business",
@@ -158,7 +164,9 @@ export default function SubscriptionPlansPage() {
       limitations: [],
       cta: "Contact Sales",
       popular: false,
-      badge: "Best Value"
+      badge: "Best Value",
+      spotsLeft: undefined,
+      savings: undefined
     }
   ];
 
