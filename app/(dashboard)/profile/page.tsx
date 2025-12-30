@@ -187,11 +187,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="font-medium text-gray-900">Member Since</p>
-                <p className="text-sm text-gray-600">
-                  {session?.user?.createdAt
-                    ? new Date(session.user.createdAt).toLocaleDateString()
-                    : "Recently"}
-                </p>
+                <p className="text-sm text-gray-600">Active</p>
               </div>
             </div>
 
