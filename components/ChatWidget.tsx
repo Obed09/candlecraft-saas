@@ -168,36 +168,36 @@ export default function ChatWidget() {
     }
     
     if (lowerMessage.match(/\b(automat|workflow|alert)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.automation + " Work smarter, not harder!"
+      return CANDLEPILOTS_KNOWLEDGE.features.automation + " Work smarter, not harder!"
     }
     
     if (lowerMessage.match(/\b(cost|profit|profitability|margin)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.costAnalysis + " Know exactly where your money goes!"
+      return CANDLEPILOTS_KNOWLEDGE.features.costAnalysis + " Know exactly where your money goes!"
     }
     
     if (lowerMessage.match(/\b(ecommerce|shopify|etsy|woocommerce|online store)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.ecommerce + " Seamless integration with your online sales!"
+      return CANDLEPILOTS_KNOWLEDGE.features.ecommerce + " Seamless integration with your online sales!"
     }
     
     if (lowerMessage.match(/\b(customer portal|client portal|account)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.customerPortal + " Enhance the customer experience!"
+      return CANDLEPILOTS_KNOWLEDGE.features.customerPortal + " Enhance the customer experience!"
     }
     
     if (lowerMessage.match(/\b(guide|learn|tutorial|how to|teach)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.guide + " Everything you need to become a candle-making pro!"
+      return CANDLEPILOTS_KNOWLEDGE.features.guide + " Everything you need to become a candle-making pro!"
     }
     
     // Benefit questions
     if (lowerMessage.match(/\b(save time|how much time|faster)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.benefits.time + " Imagine what you could do with an extra 10-15 hours each week! Are you ready to get started?"
+      return CANDLEPILOTS_KNOWLEDGE.benefits.time + " Imagine what you could do with an extra 10-15 hours each week! Are you ready to get started?"
     }
     
     if (lowerMessage.match(/\b(save money|cost|expensive|affordable)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.benefits.profit + " Plus, better organization means fewer mistakes and less wasted materials. Would you like to see a cost breakdown?"
+      return CANDLEPILOTS_KNOWLEDGE.benefits.profit + " Plus, better organization means fewer mistakes and less wasted materials. Would you like to see a cost breakdown?"
     }
     
     if (lowerMessage.match(/\b(grow|scale|business|full-time)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.benefits.scale + " We've helped hundreds of makers turn their hobby into a thriving business. Ready to join them?"
+      return CANDLEPILOTS_KNOWLEDGE.benefits.scale + " We've helped hundreds of makers turn their hobby into a thriving business. Ready to join them?"
     }
     
     // Feature list request
