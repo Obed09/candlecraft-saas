@@ -72,21 +72,21 @@ export default function InvoicesPage() {
     if (typeof window !== "undefined") {
       const settings = localStorage.getItem("businessSettings");
       return settings ? JSON.parse(settings) : {
-        businessName: "CandleFlow",
-        email: "contact@candleflow.com",
+        businessName: "CandlePilots",
+        email: "contact@candlepilots.com",
         phone: "+1-555-555-5555",
         city: "New York",
         state: "NY",
-        website: "www.candleflow.com"
+        website: "www.candlepilots.com"
       };
     }
     return {
-      businessName: "CandleFlow",
-      email: "contact@candleflow.com",
+      businessName: "CandlePilots",
+      email: "contact@candlepilots.com",
       phone: "+1-555-555-5555",
       city: "New York",
       state: "NY",
-      website: "www.candleflow.com"
+      website: "www.candlepilots.com"
     };
   };
 

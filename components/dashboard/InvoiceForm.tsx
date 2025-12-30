@@ -52,7 +52,7 @@ export default function InvoiceForm({ onClose, onSave, editInvoice }: InvoiceFor
 
   // Load business settings
   useEffect(() => {
-    const settings = localStorage.getItem("candleflow_business_settings");
+    const settings = localStorage.getItem("candlepilots_business_settings");
     if (settings) {
       const parsed = JSON.parse(settings);
       setBusinessName(parsed.businessName || "");

@@ -16,7 +16,7 @@ export default function GuidePage() {
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-bold">Professional CandleFlow Making Masterclass</CardTitle>
+                <CardTitle className="text-3xl font-bold">Professional Candle Making Masterclass by CandlePilots</CardTitle>
                 <p className="text-purple-100 mt-2">From Beginner to Expert: The Complete Guide</p>
               </div>
             </div>

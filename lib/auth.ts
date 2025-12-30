@@ -24,6 +24,13 @@ export const authOptions: NextAuthOptions = {
           where: {
             email: credentials.email,
           },
+          include: {
+            business: {
+              include: {
+                subscription: true,
+              },
+            },
+          },
         });
 
         if (!user || !user.password) {
@@ -44,6 +51,9 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          businessId: user.business?.id,
+          subscriptionPlan: user.business?.subscription?.plan || "free",
+          subscriptionStatus: user.business?.subscription?.status || "active",
         };
       },
     }),
@@ -57,17 +67,44 @@ export const authOptions: NextAuthOptions = {
     error: "/sign-in",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.businessId = (user as any).businessId;
+        token.subscriptionPlan = (user as any).subscriptionPlan;
+        token.subscriptionStatus = (user as any).subscriptionStatus;
       }
+
+      // Refresh subscription data on update trigger
+      if (trigger === "update") {
+        const userData = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          include: {
+            business: {
+              include: {
+                subscription: true,
+              },
+            },
+          },
+        });
+
+        if (userData?.business) {
+          token.businessId = userData.business.id;
+          token.subscriptionPlan = userData.business.subscription?.plan || "free";
+          token.subscriptionStatus = userData.business.subscription?.status || "active";
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).businessId = token.businessId;
+        (session.user as any).subscriptionPlan = token.subscriptionPlan;
+        (session.user as any).subscriptionStatus = token.subscriptionStatus;
       }
       return session;
     },

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CandleFlow - All-in-One Candle Business Platform",
-  description: "Calculate costs, manage inventory, track orders, and grow your candle business",
+  title: "CandlePilots - All-in-One Candle Business Platform",
+  description: "Calculate costs, manage inventory, track orders, and grow your candle business with www.candlepilots.com",
 };
 
 export default function RootLayout({

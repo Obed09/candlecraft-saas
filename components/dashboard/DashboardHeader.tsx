@@ -3,6 +3,8 @@
 import { signOut } from "next-auth/react";
 import { Bell, Search, Settings, LogOut, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +19,14 @@ interface DashboardHeaderProps {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    subscriptionPlan?: string;
+    subscriptionStatus?: string;
   };
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
+  const router = useRouter();
+
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">
       <div className="px-6 py-4">
@@ -66,18 +72,32 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <div className="px-2 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">Plan:</span>
+                    <span className="text-xs font-semibold px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full capitalize">
+                      {user?.subscriptionPlan || "free"}
+                    </span>
+                  </div>
+                </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push("/profile")}
+                  className="cursor-pointer"
+                >
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push("/settings")}
+                  className="cursor-pointer"
+                >
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600"
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
                   onClick={() => signOut({ callbackUrl: "/sign-in" })}
                 >
                   <LogOut className="w-4 h-4 mr-2" />

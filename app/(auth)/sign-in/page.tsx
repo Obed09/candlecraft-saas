@@ -49,7 +49,7 @@ export default function SignInPage() {
               Welcome Back
             </h1>
             <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-              Sign in to your CandleFlow account
+              Sign in to your CandlePilots account
             </p>
           </div>
 
@@ -98,6 +98,15 @@ export default function SignInPage() {
                 className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 focus:border-transparent bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
                 placeholder="••••••••"
               />
+            </div>
+
+            <div className="flex items-center justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             <button

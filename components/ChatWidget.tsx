@@ -11,8 +11,8 @@ interface Message {
   timestamp: Date
 }
 
-const CANDLEFLOW_KNOWLEDGE = {
-  greeting: "Hi there! 👋 I'm your CandleFlow assistant. I'm here to help you learn about our all-in-one candle business platform. What would you like to know?",
+const CANDLEPILOTS_KNOWLEDGE = {
+  greeting: "Hi there! 👋 I'm your CandlePilots assistant. I'm here to help you learn about our all-in-one candle business platform. What would you like to know?",
   
   features: {
     calculator: "Our Vessel Calculator helps you calculate precise wax measurements for any container size. You can input vessel dimensions, wax density, and fragrance load to get accurate amounts needed. It includes 6 preset vessel types and calculates wax weight, fragrance oil amounts, and total costs.",
@@ -57,14 +57,14 @@ const CANDLEFLOW_KNOWLEDGE = {
   },
   
   benefits: {
-    time: "CandleFlow saves you 10-15 hours per week by automating calculations, pricing, and inventory management.",
+    time: "CandlePilots saves you 10-15 hours per week by automating calculations, pricing, and inventory management.",
     profit: "Our users see 15-30% cost reduction through better supplier management and waste reduction.",
     scale: "Professional systems help you grow from hobby to full-time business with confidence.",
     quality: "Consistent quality through standardized recipes and testing protocols."
   },
   
   pricing: {
-    info: "CandleFlow offers flexible pricing plans to fit businesses of all sizes. Would you like me to have someone reach out to discuss the perfect plan for your needs?"
+    info: "CandlePilots offers flexible pricing plans to fit businesses of all sizes. Would you like me to have someone reach out to discuss the perfect plan for your needs?"
   }
 }
 
@@ -73,7 +73,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: CANDLEFLOW_KNOWLEDGE.greeting,
+      text: CANDLEPILOTS_KNOWLEDGE.greeting,
       sender: 'bot',
       timestamp: new Date()
     }
@@ -98,73 +98,73 @@ export default function ChatWidget() {
     
     // Greeting responses
     if (lowerMessage.match(/\b(hi|hello|hey|good morning|good afternoon)\b/)) {
-      return "Hello! 😊 I'm here to help you discover how CandleFlow can transform your candle business. What aspect interests you most - pricing, inventory, recipes, AI tools, or something else?"
+      return "Hello! 😊 I'm here to help you discover how CandlePilots can transform your candle business. What aspect interests you most - pricing, inventory, recipes, AI tools, or something else?"
     }
     
     // Feature questions - Calculators
     if (lowerMessage.includes('calculator') || lowerMessage.includes('calculate') || lowerMessage.includes('vessel')) {
-      return CANDLEFLOW_KNOWLEDGE.features.calculator + " Would you like to see it in action? You can try it right now in your dashboard!"
+      return CANDLEPILOTS_KNOWLEDGE.features.calculator + " Would you like to see it in action? You can try it right now in your dashboard!"
     }
     
     if (lowerMessage.includes('pricing') || lowerMessage.includes('price wizard')) {
-      return CANDLEFLOW_KNOWLEDGE.features.pricing + " Many of our users say this feature alone pays for the platform!"
+      return CANDLEPILOTS_KNOWLEDGE.features.pricing + " Many of our users say this feature alone pays for the platform!"
     }
     
     // AI Features
     if (lowerMessage.match(/\b(ai|artificial intelligence|scent blender|blend|custom scent)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.aiBlender + " It's one of our most popular features! Want to try creating a custom blend?"
+      return CANDLEPILOTS_KNOWLEDGE.features.aiBlender + " It's one of our most popular features! Want to try creating a custom blend?"
     }
     
     // Recipes
     if (lowerMessage.match(/\b(recipe|scent|fragrance formula|blend formula)\b/) && !lowerMessage.includes('ai')) {
-      return CANDLEFLOW_KNOWLEDGE.features.recipes + " Our recipes are professionally tested and include detailed instructions. Would you like to explore them?"
+      return CANDLEPILOTS_KNOWLEDGE.features.recipes + " Our recipes are professionally tested and include detailed instructions. Would you like to explore them?"
     }
     
     // Inventory & Suppliers
     if (lowerMessage.match(/\b(inventory|stock|supplies|materials)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.inventory + " This feature has helped our users reduce waste by up to 30%!"
+      return CANDLEPILOTS_KNOWLEDGE.features.inventory + " This feature has helped our users reduce waste by up to 30%!"
     }
     
     if (lowerMessage.match(/\b(supplier|vendor|wholesaler)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.suppliers + " You can track everything from wax types to shipping costs and payment terms!"
+      return CANDLEPILOTS_KNOWLEDGE.features.suppliers + " You can track everything from wax types to shipping costs and payment terms!"
     }
     
     // Production & Quality
     if (lowerMessage.match(/\b(production|batch|schedule|manufacturing)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.production + " Stay organized even during your busiest seasons!"
+      return CANDLEPILOTS_KNOWLEDGE.features.production + " Stay organized even during your busiest seasons!"
     }
     
     if (lowerMessage.match(/\b(quality|testing|qa|compliance|safety)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.quality + " Professional testing protocols build customer trust and loyalty."
+      return CANDLEPILOTS_KNOWLEDGE.features.quality + " Professional testing protocols build customer trust and loyalty."
     }
     
     if (lowerMessage.match(/\b(burn test|testing log|test results)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.testingLog + " Document every test to perfect your formulas!"
+      return CANDLEPILOTS_KNOWLEDGE.features.testingLog + " Document every test to perfect your formulas!"
     }
     
     // Business Tools
     if (lowerMessage.match(/\b(barcode|qr code|sku|label)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.barcodes + " Professional product labeling made easy!"
+      return CANDLEPILOTS_KNOWLEDGE.features.barcodes + " Professional product labeling made easy!"
     }
     
     if (lowerMessage.match(/\b(team|staff|employee|collaborate|permission)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.team + " Perfect for businesses with multiple team members!"
+      return CANDLEPILOTS_KNOWLEDGE.features.team + " Perfect for businesses with multiple team members!"
     }
     
     if (lowerMessage.match(/\b(order|customer order|fulfillment)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.orders + " Track every order from start to finish!"
+      return CANDLEPILOTS_KNOWLEDGE.features.orders + " Track every order from start to finish!"
     }
     
     if (lowerMessage.match(/\b(customer|client|customer management|crm)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.customers + " Build lasting relationships with your customers!"
+      return CANDLEPILOTS_KNOWLEDGE.features.customers + " Build lasting relationships with your customers!"
     }
     
     if (lowerMessage.match(/\b(invoice|billing|payment)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.invoices + " Create professional invoices in seconds!"
+      return CANDLEPILOTS_KNOWLEDGE.features.invoices + " Create professional invoices in seconds!"
     }
     
     if (lowerMessage.match(/\b(report|analytics|sales data|insights)\b/)) {
-      return CANDLEFLOW_KNOWLEDGE.features.reports + " Make data-driven decisions for your business!"
+      return CANDLEPILOTS_KNOWLEDGE.features.reports + " Make data-driven decisions for your business!"
     }
     
     if (lowerMessage.match(/\b(automat|workflow|alert)\b/)) {

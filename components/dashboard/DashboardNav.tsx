@@ -48,7 +48,7 @@ export default function DashboardNav({ user }: DashboardNavProps) {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <h1 className="text-xl font-bold text-zinc-900 dark:text-white">
-                🕯️ CandleCraft
+                🕯️ CandlePilots
               </h1>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

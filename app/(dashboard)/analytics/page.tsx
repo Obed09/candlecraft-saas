@@ -105,7 +105,7 @@ export default function DashboardOverview() {
         <div className="text-center space-y-2 py-2">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1.5 rounded-full shadow-lg text-xs">
             <Rocket className="w-3 h-3" />
-            <span className="font-semibold">Welcome to CandleFlow Pro</span>
+            <span className="font-semibold">Welcome to CandlePilots Pro</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 bg-clip-text text-transparent leading-tight">
             Everything You Need to Run Your Candle Business
@@ -172,7 +172,7 @@ export default function DashboardOverview() {
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-4 text-white">
           <div className="text-center mb-3">
             <h2 className="text-xl font-bold mb-1">
-              Why Choose CandleFlow?
+              Why Choose CandlePilots?
             </h2>
             <p className="text-blue-100 text-xs">
               Join hundreds of candle makers who transformed their businesses

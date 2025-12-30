@@ -78,7 +78,7 @@ const DEFAULT_SETTINGS: BusinessSettings = {
   emailNotifications: true
 }
 
-const STORAGE_KEY = 'candleflow_business_settings'
+const STORAGE_KEY = 'candlepilots_business_settings'
 
 export function getBusinessSettings(): BusinessSettings {
   if (typeof window === 'undefined') return DEFAULT_SETTINGS

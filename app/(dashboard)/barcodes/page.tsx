@@ -20,7 +20,7 @@ export default function BarcodeSystemPage() {
       name: "Lavender Bliss Candle",
       sku: "LAV-001",
       barcode: "1234567890123",
-      qrData: "https://candleflow.com/products/lavender-bliss",
+      qrData: "https://www.candlepilots.com/products/lavender-bliss",
     },
   ]);
 
@@ -46,7 +46,7 @@ export default function BarcodeSystemPage() {
         name: newProduct.name,
         sku: newProduct.sku,
         barcode: generateEAN13(),
-        qrData: `https://candleflow.com/products/${newProduct.sku.toLowerCase()}`,
+        qrData: `https://www.candlepilots.com/products/${newProduct.sku.toLowerCase()}`,
       };
       setProducts([...products, product]);
       setNewProduct({ name: "", sku: "" });

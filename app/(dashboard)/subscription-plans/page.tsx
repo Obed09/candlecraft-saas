@@ -2,102 +2,124 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown, GraduationCap } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
+import Link from "next/link";
 
 export default function SubscriptionPlansPage() {
   const plans = [
     {
-      name: "Starter",
+      name: "Free",
       icon: Sparkles,
-      price: "Free",
+      price: "$0",
       period: "Forever",
-      description: "Perfect for hobbyists just getting started",
+      description: "Perfect for testing and learning",
       color: "from-gray-500 to-gray-600",
       features: [
-        "Up to 25 recipes",
-        "Up to 50 products in inventory",
-        "Full cost calculator access",
-        "Up to 20 customer orders/month",
-        "Basic analytics & reporting",
-        "Recipe templates included",
-        "🤖 14 AI social media posts (total)",
-        "Facebook auto-posting only",
-        "Pre-written templates",
-        "Email support (72h response)",
-        "Community access"
+        "3 recipes",
+        "5 orders per month",
+        "10 customers",
+        "20 products in inventory",
+        "Basic cost calculator",
+        "Community support",
       ],
       limitations: [
+        "No AI features",
+        "No advanced analytics",
+        "No automation",
         "No barcode generation",
-        "No AI voice training",
-        "No Instagram or LinkedIn",
-        "No team collaboration",
-        "No Masterclass access"
+        "No team collaboration"
       ],
       cta: "Get Started Free",
+      ctaLink: "/sign-up?plan=free",
       popular: false
     },
     {
-      name: "Professional",
+      name: "Starter",
       icon: Zap,
-      price: "$19",
-      originalPrice: "$39",
+      price: "$29",
       period: "per month",
-      subtext: "FOUNDER PRICING - LOCKED FOREVER",
-      description: "Lock in this rate for life - First 1,000 users only",
-      color: "from-purple-600 to-indigo-600",
+      description: "Great for small businesses getting started",
+      color: "from-blue-600 to-indigo-600",
       features: [
-        "✨ EVERYTHING UNLIMITED - No restrictions",
-        "Unlimited recipes & products",
-        "Full inventory management",
-        "Advanced cost calculator & pricing wizard",
-        "Unlimited orders & customers",
-        "Production planning & scheduling",
-        "Supplier management system",
-        "Quality control workflows",
+        "50 recipes",
+        "100 orders per month",
+        "200 customers",
+        "200 products",
+        "Full cost calculator & pricing wizard",
+        "Basic AI features included",
+        "Production planning",
+        "Invoice generation",
         "Barcode & QR code generation",
-        "Professional invoice generation",
-        "Advanced analytics & reporting",
-        "Testing log & recipe database",
-        "🤖 30 AI social media posts/month",
-        "✨ AI learns YOUR writing style",
-        "Facebook + Instagram auto-posting",
-        "Sounds human, not robotic",
-        "Priority email support (24h response)",
-        "🎁 FREE Beginner's Masterclass ($297 value)",
-        "🏆 Founder Member badge & exclusive group",
-        "🔒 Price locked forever - Never increases"
+        "Email support (48h response)",
+        "Recipe templates",
       ],
       limitations: [
         "Single user account",
-        "LinkedIn not included"
+        "No automation",
+        "No advanced analytics"
       ],
-      cta: "Lock In $19/mo Forever",
+      cta: "Start 14-Day Trial",
+      ctaLink: "/sign-up?plan=starter",
       popular: true,
-      badge: "FOUNDER SPECIAL",
-      spotsLeft: "647 spots remaining",
-      savings: "Save $240/year"
+      badge: "MOST POPULAR"
+    },
+    {
+      name: "Pro",
+      icon: Crown,
+      price: "$79",
+      period: "per month",
+      description: "For growing businesses that need full features",
+      color: "from-purple-600 to-pink-600",
+      features: [
+        "✨ Everything Unlimited",
+        "Unlimited recipes, orders, customers",
+        "Unlimited products & inventory",
+        "Full AI-powered features",
+        "Advanced analytics & reporting",
+        "Automation workflows",
+        "Supplier management",
+        "Quality control system",
+        "Production scheduling",
+        "AI scent blending",
+        "AI business insights",
+        "Priority support (24h response)",
+        "Advanced integrations",
+      ],
+      limitations: [
+        "Single user account",
+        "No API access"
+      ],
+      cta: "Start 14-Day Trial",
+      ctaLink: "/sign-up?plan=pro",
+      popular: false
     },
     {
       name: "Business",
-      icon: Crown,
-      price: "$49",
-      originalPrice: "$99",
+      icon: Building2,
+      price: "$149",
       period: "per month",
-      subtext: "EARLY ADOPTER PRICING - Year 1",
-      description: "For teams & growing businesses",
+      description: "Enterprise features for scaling operations",
       color: "from-amber-500 to-orange-600",
       features: [
-        "Everything in Professional, plus:",
-        "Up to 5 team members included",
-        "Team collaboration & role management",
-        "Customer portal with order tracking",
-        "🚀 120 AI social media posts/month",
-        "Facebook + Instagram + LinkedIn",
-        "Advanced AI voice matching",
-        "Auto-reply to comments (coming soon)",
-        "AI-powered scent blending (30 requests/mo)",
-        "AI business insights (20 requests/mo)",
-        "E-commerce platform integration",
+        "Everything in Pro, plus:",
+        "Multi-user access (up to 10 users)",
+        "Team collaboration & roles",
+        "Customer portal",
+        "API access",
+        "White-label options",
+        "E-commerce integration",
+        "Custom domain",
+        "Advanced security",
+        "Dedicated account manager",
+        "Custom training",
+        "24/7 priority support",
+        "SLA guarantee",
+      ],
+      limitations: [],
+      cta: "Contact Sales",
+      ctaLink: "/sign-up?plan=business",
+      popular: false
+    },
         "Advanced automation workflows",
         "Custom branding on invoices & documents",
         "Dedicated support (4h response)",
@@ -280,15 +302,17 @@ export default function SubscriptionPlansPage() {
                 </div>
 
                 {/* CTA Button */}
-                <button
-                  className={`w-full py-3 px-6 rounded-lg font-bold transition-all mb-6 ${
-                    plan.popular
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
-                      : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                  }`}
-                >
-                  {plan.cta}
-                </button>
+                <Link href={plan.ctaLink || `/sign-up?plan=${plan.name.toLowerCase()}`}>
+                  <button
+                    className={`w-full py-3 px-6 rounded-lg font-bold transition-all mb-6 ${
+                      plan.popular
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                    }`}
+                  >
+                    {plan.cta}
+                  </button>
+                </Link>
 
                 {/* Features */}
                 <div className="space-y-3">

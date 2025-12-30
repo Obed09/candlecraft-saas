@@ -34,7 +34,7 @@ export default function TeamPage() {
     {
       id: '1',
       name: 'John Smith',
-      email: 'john@candlecraft.com',
+      email: 'john@candlepilots.com',
       phone: '+1 (555) 001-0001',
       role: 'admin',
       joinedDate: new Date(2024, 0, 1),
@@ -44,7 +44,7 @@ export default function TeamPage() {
     {
       id: '2',
       name: 'Emily Rodriguez',
-      email: 'emily@candlecraft.com',
+      email: 'emily@candlepilots.com',
       phone: '+1 (555) 002-0002',
       role: 'manager',
       joinedDate: new Date(2024, 2, 15),
@@ -54,7 +54,7 @@ export default function TeamPage() {
     {
       id: '3',
       name: 'Michael Chen',
-      email: 'michael@candlecraft.com',
+      email: 'michael@candlepilots.com',
       phone: '+1 (555) 003-0003',
       role: 'staff',
       joinedDate: new Date(2024, 5, 1),

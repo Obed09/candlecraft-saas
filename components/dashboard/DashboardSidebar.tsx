@@ -250,7 +250,7 @@ export default function DashboardSidebar() {
                   className="bg-white text-gray-900 px-3 py-2 rounded-lg shadow-lg text-sm max-w-xs z-[9999]"
                   sideOffset={5}
                 >
-                  Learn how to use CandleFlow with step-by-step tutorials and guides
+                  Learn how to use CandlePilots with step-by-step tutorials and guides
                   <Tooltip.Arrow className="fill-white" />
                 </Tooltip.Content>
               </Tooltip.Portal>
