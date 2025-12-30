@@ -20,7 +20,7 @@ export default function SubscriptionPlansPage() {
         "10 customers",
         "20 products in inventory",
         "Basic cost calculator",
-        "Community support",
+        "Community support"
       ],
       limitations: [
         "No AI features",
@@ -32,11 +32,11 @@ export default function SubscriptionPlansPage() {
       cta: "Get Started Free",
       ctaLink: "/sign-up?plan=free",
       popular: false,
-      badge: undefined,
-      spotsLeft: undefined,
-      savings: undefined,
-      originalPrice: undefined,
-      subtext: undefined
+      badge: null,
+      spotsLeft: null,
+      savings: null,
+      originalPrice: null,
+      subtext: null
     },
     {
       name: "Starter",
@@ -56,7 +56,7 @@ export default function SubscriptionPlansPage() {
         "Invoice generation",
         "Barcode & QR code generation",
         "Email support (48h response)",
-        "Recipe templates",
+        "Recipe templates"
       ],
       limitations: [
         "Single user account",
@@ -67,10 +67,10 @@ export default function SubscriptionPlansPage() {
       ctaLink: "/sign-up?plan=starter",
       popular: true,
       badge: "MOST POPULAR",
-      spotsLeft: undefined,
-      savings: undefined,
-      originalPrice: undefined,
-      subtext: undefined
+      spotsLeft: null,
+      savings: null,
+      originalPrice: null,
+      subtext: null
     },
     {
       name: "Pro",
@@ -92,7 +92,7 @@ export default function SubscriptionPlansPage() {
         "AI scent blending",
         "AI business insights",
         "Priority support (24h response)",
-        "Advanced integrations",
+        "Advanced integrations"
       ],
       limitations: [
         "Single user account",
@@ -101,11 +101,11 @@ export default function SubscriptionPlansPage() {
       cta: "Start 14-Day Trial",
       ctaLink: "/sign-up?plan=pro",
       popular: false,
-      badge: undefined,
-      spotsLeft: undefined,
-      savings: undefined,
-      originalPrice: undefined,
-      subtext: undefined
+      badge: null,
+      spotsLeft: null,
+      savings: null,
+      originalPrice: null,
+      subtext: null
     },
     {
       name: "Business",
@@ -141,8 +141,8 @@ export default function SubscriptionPlansPage() {
       badge: "Best for Teams",
       spotsLeft: "289 spots remaining",
       savings: "Save $600 first year",
-      originalPrice: undefined,
-      subtext: undefined
+      originalPrice: null,
+      subtext: null
     },
     {
       name: "Enterprise",
@@ -175,10 +175,10 @@ export default function SubscriptionPlansPage() {
       cta: "Contact Sales",
       popular: false,
       badge: "Best Value",
-      spotsLeft: undefined,
-      savings: undefined,
-      originalPrice: undefined,
-      subtext: undefined
+      spotsLeft: null,
+      savings: null,
+      originalPrice: null,
+      subtext: null
     }
   ];
 
