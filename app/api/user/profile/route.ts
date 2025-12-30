@@ -18,7 +18,6 @@ export async function GET() {
         name: true,
         email: true,
         createdAt: true,
-        businessId: true,
       },
     });
 
