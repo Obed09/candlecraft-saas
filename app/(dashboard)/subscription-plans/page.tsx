@@ -34,7 +34,9 @@ export default function SubscriptionPlansPage() {
       popular: false,
       badge: undefined,
       spotsLeft: undefined,
-      savings: undefined
+      savings: undefined,
+      originalPrice: undefined,
+      subtext: undefined
     },
     {
       name: "Starter",
@@ -64,7 +66,11 @@ export default function SubscriptionPlansPage() {
       cta: "Start 14-Day Trial",
       ctaLink: "/sign-up?plan=starter",
       popular: true,
-      badge: "MOST POPULAR"
+      badge: "MOST POPULAR",
+      spotsLeft: undefined,
+      savings: undefined,
+      originalPrice: undefined,
+      subtext: undefined
     },
     {
       name: "Pro",
@@ -97,7 +103,9 @@ export default function SubscriptionPlansPage() {
       popular: false,
       badge: undefined,
       spotsLeft: undefined,
-      savings: undefined
+      savings: undefined,
+      originalPrice: undefined,
+      subtext: undefined
     },
     {
       name: "Business",
@@ -132,7 +140,9 @@ export default function SubscriptionPlansPage() {
       popular: false,
       badge: "Best for Teams",
       spotsLeft: "289 spots remaining",
-      savings: "Save $600 first year"
+      savings: "Save $600 first year",
+      originalPrice: undefined,
+      subtext: undefined
     },
     {
       name: "Enterprise",
@@ -166,7 +176,9 @@ export default function SubscriptionPlansPage() {
       popular: false,
       badge: "Best Value",
       spotsLeft: undefined,
-      savings: undefined
+      savings: undefined,
+      originalPrice: undefined,
+      subtext: undefined
     }
   ];
 
