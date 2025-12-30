@@ -216,8 +216,6 @@ export default function SignUpPage() {
 
   const selectedPlanInfo = PLANS.find((p) => p.id === selectedPlan) || PLANS[0];
 
-  const selectedPlanInfo = PLANS.find((p) => p.id === selectedPlan) || PLANS[0];
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black px-4 py-12">
       <div className="w-full max-w-2xl">

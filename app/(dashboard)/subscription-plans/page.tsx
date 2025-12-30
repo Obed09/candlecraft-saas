@@ -118,8 +118,10 @@ export default function SubscriptionPlansPage() {
       limitations: [],
       cta: "Contact Sales",
       ctaLink: "/sign-up?plan=business",
-      popular: false
-    },
+      popular: false,
+      features: [
+        "Unlimited recipes & orders",
+        "All AI features",
         "Advanced automation workflows",
         "Custom branding on invoices & documents",
         "Dedicated support (4h response)",
@@ -128,8 +130,6 @@ export default function SubscriptionPlansPage() {
         "Data export & API access"
       ],
       limitations: [],
-      cta: "Start 14-Day Free Trial",
-      popular: false,
       badge: "Best for Teams",
       spotsLeft: "289 spots remaining",
       savings: "Save $600 first year"
