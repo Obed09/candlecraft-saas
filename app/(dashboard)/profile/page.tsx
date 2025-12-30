@@ -98,7 +98,7 @@ export default function ProfilePage() {
               <p className="text-gray-600">{session?.user?.email}</p>
               <div className="mt-2 flex items-center gap-2">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  {session?.user?.subscription?.plan?.toUpperCase() || "FREE"}
+                  {session?.user?.subscriptionPlan?.toUpperCase() || "FREE"}
                 </span>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
               <div>
                 <p className="font-medium text-gray-900">Subscription Plan</p>
                 <p className="text-sm text-gray-600 capitalize">
-                  {session?.user?.subscription?.plan || "Free"}
+                  {session?.user?.subscriptionPlan || "Free"}
                 </p>
               </div>
             </div>
