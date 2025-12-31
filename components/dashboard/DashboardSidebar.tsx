@@ -126,15 +126,15 @@ export default function DashboardSidebar() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 flex items-center justify-center">
                 <Image 
-                  src="/candleflow logo updated.png" 
-                  alt="CandleFlow Logo" 
+                  src="/CandlePilots logo updated.png" 
+                  alt="CandlePilots Logo" 
                   width={40} 
                   height={40}
                   priority
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">CandleFlow</h1>
+                <h1 className="text-xl font-bold text-white">CandlePilots</h1>
                 <p className="text-xs text-purple-300">Business Platform</p>
               </div>
             </div>

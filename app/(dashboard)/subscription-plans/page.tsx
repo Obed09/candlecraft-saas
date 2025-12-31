@@ -405,7 +405,7 @@ export default function SubscriptionPlansPage() {
         <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Zero Risk. All Reward.</h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            We're so confident you'll love CandleFlow, we've eliminated all the risk
+            We're so confident you'll love CandlePilots, we've eliminated all the risk
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -621,7 +621,7 @@ export default function SubscriptionPlansPage() {
             },
             {
               q: "What if I'm not satisfied?",
-              a: "We offer a 60-day money-back guarantee. If CandleFlow isn't right for you, we'll refund every penny - no questions asked."
+              a: "We offer a 60-day money-back guarantee. If CandlePilots isn't right for you, we'll refund every penny - no questions asked."
             }
           ].map((faq, idx) => (
             <Card key={idx} className="p-6">

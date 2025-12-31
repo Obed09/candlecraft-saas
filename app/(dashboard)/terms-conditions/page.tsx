@@ -34,13 +34,13 @@ export default function TermsConditionsPage() {
                   </h2>
                   <div className="space-y-4">
                     <p>
-                      Welcome to <strong>CandleFlow</strong> ("Company," "we," "our," "us"). These Terms and Conditions ("Terms") govern your access to and use of our candle-making business management software platform, including our website, mobile applications, and related services (collectively, the "Service").
+                      Welcome to <strong>CandlePilots</strong> ("Company," "we," "our," "us"). These Terms and Conditions ("Terms") govern your access to and use of our candle-making business management software platform, including our website, mobile applications, and related services (collectively, the "Service").
                     </p>
                     <p>
                       By accessing or using our Service, you agree to be bound by these Terms. If you disagree with any part of these Terms, you may not access the Service.
                     </p>
                     <p className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 rounded">
-                      <strong>Important:</strong> These Terms constitute a legally binding agreement between you and CandleFlow. Please read them carefully.
+                      <strong>Important:</strong> These Terms constitute a legally binding agreement between you and CandlePilots. Please read them carefully.
                     </p>
                   </div>
                 </section>
@@ -52,7 +52,7 @@ export default function TermsConditionsPage() {
                   </h2>
                   <div className="space-y-4">
                     <p>
-                      CandleFlow provides a comprehensive SaaS platform designed specifically for candle-making businesses. Our Service includes, but is not limited to:
+                      CandlePilots provides a comprehensive SaaS platform designed specifically for candle-making businesses. Our Service includes, but is not limited to:
                     </p>
                     <ul className="list-disc pl-8 space-y-2">
                       <li><strong>Recipe Management:</strong> Create, store, and manage candle recipes with detailed ingredient tracking</li>
@@ -110,7 +110,7 @@ export default function TermsConditionsPage() {
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">4.1 Subscription Plans</h3>
                     <p>
-                      CandleFlow offers various subscription tiers with different features and pricing. Current plans include:
+                      CandlePilots offers various subscription tiers with different features and pricing. Current plans include:
                     </p>
                     <ul className="list-disc pl-8 space-y-2">
                       <li><strong>Free Tier:</strong> Basic features with limitations</li>
@@ -155,7 +155,7 @@ export default function TermsConditionsPage() {
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">5.1 Our Intellectual Property</h3>
                     <p>
-                      The Service and its original content, features, and functionality are owned by CandleFlow and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+                      The Service and its original content, features, and functionality are owned by CandlePilots and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
                     </p>
                     <p>
                       Our trademarks, service marks, logos, and trade dress may not be used without our prior written permission.
@@ -335,7 +335,7 @@ export default function TermsConditionsPage() {
                   <div className="space-y-4">
                     <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded">
                       <p>
-                        TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL CANDLEFLOW, ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO:
+                        TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL CandlePilots, ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO:
                       </p>
                     </div>
                     <ul className="list-disc pl-8 space-y-2">
@@ -366,7 +366,7 @@ export default function TermsConditionsPage() {
                   </h2>
                   <div className="space-y-4">
                     <p>
-                      You agree to indemnify, defend, and hold harmless CandleFlow, its affiliates, officers, directors, employees, agents, and licensors from and against any claims, liabilities, damages, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising from:
+                      You agree to indemnify, defend, and hold harmless CandlePilots, its affiliates, officers, directors, employees, agents, and licensors from and against any claims, liabilities, damages, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising from:
                     </p>
                     <ul className="list-disc pl-8 space-y-2">
                       <li>Your use or misuse of the Service</li>
@@ -483,7 +483,7 @@ export default function TermsConditionsPage() {
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">16.1 Entire Agreement</h3>
                     <p>
-                      These Terms, together with our Privacy Policy and any other agreements referenced herein, constitute the entire agreement between you and CandleFlow regarding the Service.
+                      These Terms, together with our Privacy Policy and any other agreements referenced herein, constitute the entire agreement between you and CandlePilots regarding the Service.
                     </p>
 
                     <h3 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400 mt-4">16.2 Severability</h3>
@@ -523,11 +523,11 @@ export default function TermsConditionsPage() {
                       If you have any questions, concerns, or disputes regarding these Terms, please contact us:
                     </p>
                     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-6 rounded-lg border-2 border-purple-200 dark:border-purple-800">
-                      <p className="font-semibold text-lg mb-3">📧 CandleFlow Support</p>
+                      <p className="font-semibold text-lg mb-3">📧 CandlePilots Support</p>
                       <ul className="space-y-2">
-                        <li><strong>Email:</strong> legal@candleflow.com</li>
-                        <li><strong>Support:</strong> support@candleflow.com</li>
-                        <li><strong>Website:</strong> www.candleflow.com</li>
+                        <li><strong>Email:</strong> legal@CandlePilots.com</li>
+                        <li><strong>Support:</strong> support@CandlePilots.com</li>
+                        <li><strong>Website:</strong> www.CandlePilots.com</li>
                         <li><strong>Business Hours:</strong> Monday - Friday, 9:00 AM - 5:00 PM EST</li>
                       </ul>
                     </div>
@@ -541,7 +541,7 @@ export default function TermsConditionsPage() {
                       ✅ Acknowledgment of Terms
                     </h3>
                     <p className="text-gray-700 dark:text-gray-300">
-                      By clicking "I Accept," creating an account, or using the CandleFlow Service, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. You also acknowledge that you have read and understood our Privacy Policy.
+                      By clicking "I Accept," creating an account, or using the CandlePilots Service, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. You also acknowledge that you have read and understood our Privacy Policy.
                     </p>
                     <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 italic">
                       We recommend that you print or save a copy of these Terms for your records.

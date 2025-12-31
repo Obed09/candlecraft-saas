@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-4">Introduction</h2>
                 <p className="mb-4">
-                  Welcome to our Candle Making Platform <strong>"CANDLEFLOW"</strong> ("we," "us," "our," or "Platform"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Platform.
+                  Welcome to our Candle Making Platform <strong>"CandlePilots"</strong> ("we," "us," "our," or "Platform"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Platform.
                 </p>
                 <p>
                   Please read this Privacy Policy carefully. By using our Platform, you agree to the collection and use of information in accordance with this policy.

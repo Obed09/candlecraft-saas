@@ -202,17 +202,17 @@ export default function ChatWidget() {
     
     // Feature list request
     if (lowerMessage.match(/\b(features|what can|what does|capabilities|tools)\b/)) {
-      return "CandleFlow has 20+ powerful features! Here are the highlights:\n\n🧮 Vessel Calculator & Pricing Wizard\n🤖 AI Scent Blender\n📋 79+ Professional Recipes\n📦 Inventory Management\n🏭 Production Scheduling\n✅ Quality Control\n📊 Business Reports\n🛒 E-commerce Integration\n👥 Team Collaboration\n📱 Customer Portal\n\n...and so much more! Which feature interests you most?"
+      return "CandlePilots has 20+ powerful features! Here are the highlights:\n\n🧮 Vessel Calculator & Pricing Wizard\n🤖 AI Scent Blender\n📋 79+ Professional Recipes\n📦 Inventory Management\n🏭 Production Scheduling\n✅ Quality Control\n📊 Business Reports\n🛒 E-commerce Integration\n👥 Team Collaboration\n📱 Customer Portal\n\n...and so much more! Which feature interests you most?"
     }
     
     // Pricing questions
     if (lowerMessage.match(/\b(how much|cost|price|plan|subscription|pay)\b/)) {
-      return "Great question! CandleFlow offers plans starting at competitive rates designed for businesses at every stage. We also offer a free trial so you can experience the platform risk-free. Would you like me to connect you with our team to find the perfect plan for your needs?"
+      return "Great question! CandlePilots offers plans starting at competitive rates designed for businesses at every stage. We also offer a free trial so you can experience the platform risk-free. Would you like me to connect you with our team to find the perfect plan for your needs?"
     }
     
     // Purchase intent
     if (lowerMessage.match(/\b(buy|purchase|get started|sign up|trial)\b/)) {
-      return "Wonderful! 🎉 I'm so excited for you to experience CandleFlow! You can start your free trial right now by clicking the 'Sign Up' button at the top of the page. No credit card required! Or would you prefer to speak with someone from our team first?"
+      return "Wonderful! 🎉 I'm so excited for you to experience CandlePilots! You can start your free trial right now by clicking the 'Sign Up' button at the top of the page. No credit card required! Or would you prefer to speak with someone from our team first?"
     }
     
     // Already a customer
@@ -227,7 +227,7 @@ export default function ChatWidget() {
     
     // Thank you
     if (lowerMessage.match(/\b(thank|thanks|appreciate)\b/)) {
-      return "You're very welcome! 😊 Is there anything else I can help you with? I'm always here if you have more questions about CandleFlow!"
+      return "You're very welcome! 😊 Is there anything else I can help you with? I'm always here if you have more questions about CandlePilots!"
     }
     
     // Complex/Technical questions that need escalation
@@ -238,7 +238,7 @@ export default function ChatWidget() {
     }
     
     // Default response
-    return "That's a great question! CandleFlow is an all-in-one platform for candle makers with 20+ features including:\n\n• Vessel Calculator & Pricing Wizard\n• AI-Powered Scent Blender\n• 79+ Professional Recipes\n• Inventory & Supplier Management\n• Production Scheduling\n• Quality Control & Testing\n• Business Analytics\n• E-commerce Integration\n\nWould you like to:\n• Learn about specific features?\n• Start a free trial?\n• Speak with our team?\n\nWhat interests you most? 😊"
+    return "That's a great question! CandlePilots is an all-in-one platform for candle makers with 20+ features including:\n\n• Vessel Calculator & Pricing Wizard\n• AI-Powered Scent Blender\n• 79+ Professional Recipes\n• Inventory & Supplier Management\n• Production Scheduling\n• Quality Control & Testing\n• Business Analytics\n• E-commerce Integration\n\nWould you like to:\n• Learn about specific features?\n• Start a free trial?\n• Speak with our team?\n\nWhat interests you most? 😊"
   }
 
   const handleSend = () => {
@@ -368,15 +368,15 @@ export default function ChatWidget() {
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
               <Image 
-                src="/candleflow logo updated.png" 
-                alt="CandleFlow Logo" 
+                src="/CandlePilots logo updated.png" 
+                alt="CandlePilots Logo" 
                 width={32} 
                 height={32}
                 className="object-contain"
               />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-lg">CandleFlow Assistant</h3>
+              <h3 className="font-bold text-lg">CandlePilots Assistant</h3>
               <p className="text-xs text-purple-100">Always here to help!</p>
             </div>
           </div>

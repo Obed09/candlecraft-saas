@@ -14,7 +14,7 @@ export default function DashboardFooter() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex flex-col md:flex-row items-center gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-purple-600 font-semibold">🕯️ CandleFlow</span>
+                <span className="text-purple-600 font-semibold">🕯️ CandlePilots</span>
                 <span className="hidden md:inline">•</span>
               </div>
               <span className="text-xs md:text-sm">

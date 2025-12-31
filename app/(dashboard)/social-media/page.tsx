@@ -657,7 +657,7 @@ export default function SocialMediaPage() {
                   <h3 className="text-xl font-bold text-purple-900">💜 Suggested Hashtags</h3>
                   <button
                     onClick={() => {
-                      const hashtags = `#CandleFlow #HandmadeCandles #CandleLover #AromaFragrance #${vibe.replace(' ', '')}Candle #SoyCandles #CandleAddict #HomeBusiness #SmallBusiness #Natural #EcoFriendly #SupportLocal #CandleCommunity #HomeDecor`;
+                      const hashtags = `#CandlePilots #HandmadeCandles #CandleLover #AromaFragrance #${vibe.replace(' ', '')}Candle #SoyCandles #CandleAddict #HomeBusiness #SmallBusiness #Natural #EcoFriendly #SupportLocal #CandleCommunity #HomeDecor`;
                       navigator.clipboard.writeText(hashtags);
                       alert('Hashtags copied!');
                     }}
@@ -667,7 +667,7 @@ export default function SocialMediaPage() {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {['#CandleFlow', '#HandmadeCandles', '#CandleLover', '#AromaFragrance', `#${vibe.replace(' ', '')}Candle`, '#SoyCandles', '#CandleAddict', '#HomeBusiness', '#SmallBusiness', '#Natural', '#EcoFriendly', '#SupportLocal', '#CandleCommunity', '#HomeDecor', '#CandleMaking'].map((tag, idx) => (
+                  {['#CandlePilots', '#HandmadeCandles', '#CandleLover', '#AromaFragrance', `#${vibe.replace(' ', '')}Candle`, '#SoyCandles', '#CandleAddict', '#HomeBusiness', '#SmallBusiness', '#Natural', '#EcoFriendly', '#SupportLocal', '#CandleCommunity', '#HomeDecor', '#CandleMaking'].map((tag, idx) => (
                     <span key={idx} className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">
                       {tag}
                     </span>
