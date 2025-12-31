@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Zap, Plus, Settings, Calendar, Package, Bell, ChevronRight, Trash2, CheckCircle, HelpCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Zap, Plus, Settings, Calendar, Package, Bell, ChevronRight, Trash2, CheckCircle, HelpCircle, X, RotateCcw } from "lucide-react";
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 interface AutomationRule {
@@ -22,6 +22,32 @@ interface AutomationRule {
 }
 
 export default function AutomationPage() {
+  const [showBanner, setShowBanner] = useState(true);
+
+  // Check localStorage on mount
+  useEffect(() => {
+    const bannerDismissed = localStorage.getItem('automation-banner-dismissed');
+    if (bannerDismissed === 'true') {
+      setShowBanner(false);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    setShowBanner(false);
+    localStorage.setItem('automation-banner-dismissed', 'true');
+  };
+
+  const handleReset = () => {
+    // Reset to example automation rules
+    window.location.reload();
+  };
+
+  const handleClearAll = () => {
+    if (confirm('Are you sure you want to remove all automation rules? This will disable all automated workflows.')) {
+      setRules([]);
+    }
+  };
+
   const [rules, setRules] = useState<AutomationRule[]>([
     {
       id: '1',
@@ -105,6 +131,43 @@ export default function AutomationPage() {
   return (
     <Tooltip.Provider delayDuration={200}>
     <div className="max-w-7xl mx-auto p-8">
+      {/* Info Banner */}
+      {showBanner && (
+        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 flex items-start justify-between gap-4 shadow-sm mb-6">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="text-2xl">📝</div>
+            <div className="flex-1">
+              <p className="text-gray-800 font-medium">
+                These are example automation rules to get you started! Create your own rules with custom thresholds, schedules, and triggers to automate your candle production workflow.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap shadow-sm"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </button>
+            <button
+              onClick={handleClearAll}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear All
+            </button>
+            <button
+              onClick={handleDismissBanner}
+              className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
+              aria-label="Dismiss banner"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">

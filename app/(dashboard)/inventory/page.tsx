@@ -1,12 +1,39 @@
 "use client";
 
-import { Package, Plus, AlertTriangle, TrendingDown, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Package, Plus, AlertTriangle, TrendingDown, TrendingUp, X, RotateCcw, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import InventoryManager from "@/components/dashboard/InventoryManager";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { HelpCircle } from "lucide-react";
 
 export default function InventoryPage() {
+  const [showBanner, setShowBanner] = useState(true);
+
+  // Check localStorage on mount
+  useEffect(() => {
+    const bannerDismissed = localStorage.getItem('inventory-banner-dismissed');
+    if (bannerDismissed === 'true') {
+      setShowBanner(false);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    setShowBanner(false);
+    localStorage.setItem('inventory-banner-dismissed', 'true');
+  };
+
+  const handleReset = () => {
+    // This page displays static data, so reset would reload example values
+    window.location.reload();
+  };
+
+  const handleClearAll = () => {
+    // Clear all inventory would typically reset to empty state
+    // Since this is display-only, we'll just provide feedback
+    alert("To clear inventory, use the Inventory Manager component below.");
+  };
+
   const inventoryItems = [
     { name: "Soy Wax", quantity: 45, unit: "lbs", lowStock: false, value: 382.50, trend: "up" },
     { name: "Coconut Wax", quantity: 12, unit: "lbs", lowStock: true, value: 156.00, trend: "down" },
@@ -22,6 +49,43 @@ export default function InventoryPage() {
   return (
     <Tooltip.Provider delayDuration={200}>
       <div className="space-y-6">
+        {/* Info Banner */}
+        {showBanner && (
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 flex items-start justify-between gap-4 shadow-sm">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="text-2xl">📝</div>
+              <div className="flex-1">
+                <p className="text-gray-800 font-medium">
+                  These are example inventory values to get you started! Edit any field to track your actual stock levels and see real-time calculations for your business.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap shadow-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset
+              </button>
+              <button
+                onClick={handleClearAll}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear All
+              </button>
+              <button
+                onClick={handleDismissBanner}
+                className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
+                aria-label="Dismiss banner"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

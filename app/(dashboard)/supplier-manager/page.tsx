@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, X, RotateCcw, Trash2 } from 'lucide-react'
 
 interface Supplier {
   id: string
@@ -30,6 +30,32 @@ interface Supplier {
 }
 
 export default function SupplierManagerPage() {
+  const [showBanner, setShowBanner] = useState(true);
+
+  // Check localStorage on mount
+  useEffect(() => {
+    const bannerDismissed = localStorage.getItem('supplier-manager-banner-dismissed');
+    if (bannerDismissed === 'true') {
+      setShowBanner(false);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    setShowBanner(false);
+    localStorage.setItem('supplier-manager-banner-dismissed', 'true');
+  };
+
+  const handleReset = () => {
+    // Reset to example suppliers
+    window.location.reload();
+  };
+
+  const handleClearAll = () => {
+    if (confirm('Are you sure you want to remove all suppliers? This will clear your supplier list.')) {
+      setSuppliers([]);
+    }
+  };
+
   const [suppliers, setSuppliers] = useState<Supplier[]>([
     {
       id: '1',
@@ -229,6 +255,43 @@ export default function SupplierManagerPage() {
   return (
     <Tooltip.Provider delayDuration={200}>
       <div className="p-8">
+        {/* Info Banner */}
+        {showBanner && (
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 flex items-start justify-between gap-4 shadow-sm mb-6">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="text-2xl">📝</div>
+              <div className="flex-1">
+                <p className="text-gray-800 font-medium">
+                  These are example suppliers to get you started! Add your own suppliers with their pricing and contact details to compare costs and manage your vendor relationships.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap shadow-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset
+              </button>
+              <button
+                onClick={handleClearAll}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear All
+              </button>
+              <button
+                onClick={handleDismissBanner}
+                className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
+                aria-label="Dismiss banner"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent flex items-center gap-2">

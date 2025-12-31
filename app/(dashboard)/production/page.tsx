@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, X, RotateCcw, Trash2 } from 'lucide-react'
 
 interface Vessel {
   id: number
@@ -32,6 +32,32 @@ interface ProductionOrder {
 }
 
 export default function ProductionPage() {
+  const [showBanner, setShowBanner] = useState(true);
+
+  // Check localStorage on mount
+  useEffect(() => {
+    const bannerDismissed = localStorage.getItem('production-banner-dismissed');
+    if (bannerDismissed === 'true') {
+      setShowBanner(false);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    setShowBanner(false);
+    localStorage.setItem('production-banner-dismissed', 'true');
+  };
+
+  const handleReset = () => {
+    // Reset to example production orders
+    window.location.reload();
+  };
+
+  const handleClearAll = () => {
+    if (confirm('Are you sure you want to remove all production orders? This will clear your production schedule.')) {
+      setProductionOrders([]);
+    }
+  };
+
   const vessels: Vessel[] = [
     { id: 100, name: "Large Shallow", diameter: 8.2, height: 2.36, unit: "in" },
     { id: 101, name: "Medium Cylinder", diameter: 5.43, height: 2.16, unit: "in" },
@@ -155,6 +181,43 @@ export default function ProductionPage() {
   return (
     <Tooltip.Provider delayDuration={200}>
       <div className="p-8">
+        {/* Info Banner */}
+        {showBanner && (
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4 flex items-start justify-between gap-4 shadow-sm mb-6">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="text-2xl">📝</div>
+              <div className="flex-1">
+                <p className="text-gray-800 font-medium">
+                  These are example production orders to get you started! Add your own orders with quantities, due dates, and priorities to schedule and track your candle production batches.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap shadow-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset
+              </button>
+              <button
+                onClick={handleClearAll}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear All
+              </button>
+              <button
+                onClick={handleDismissBanner}
+                className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
+                aria-label="Dismiss banner"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
             📅 Production Scheduler
