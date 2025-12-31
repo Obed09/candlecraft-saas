@@ -188,7 +188,7 @@ export default function PartnerLinksPage() {
               <div className="border-t pt-4">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Commission Structure:</p>
                 <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                  <li>• Professional Plan: $19/mo × 25% = <span className="font-semibold">$4.75/user</span></li>
+                  <li>• Professional Plan: \$29/mo × 25% = <span className="font-semibold">$4.75/user</span></li>
                   <li>• Business Plan: $49/mo × 25% = <span className="font-semibold">$12.25/user</span></li>
                   <li>• Paid monthly, tracked automatically</li>
                 </ul>

@@ -612,8 +612,8 @@ export default function SubscriptionPlansPage() {
               a: "Yes! The Beginner's Masterclass ($297 value) is included FREE with Professional, Business, and Enterprise plans. The Cement Vessel Workshop is exclusive to Enterprise."
             },
             {
-              q: "Is the $19 Founder price really locked forever?",
-              a: "Absolutely! Once you lock in founder pricing at $19/mo, that rate never changes - even as we raise prices for new customers. It's our way of rewarding early supporters."
+              q: "Is the \$29 Founder price really locked forever?",
+              a: "Absolutely! Once you lock in founder pricing at \$29/mo, that rate never changes - even as we raise prices for new customers. It's our way of rewarding early supporters."
             },
             {
               q: "Do you offer discounts for annual billing?",
@@ -644,7 +644,7 @@ export default function SubscriptionPlansPage() {
           </Badge>
         </div>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Don't Miss Your Chance to Lock In $19/mo Forever
+          Don't Miss Your Chance to Lock In \$29/mo Forever
         </h2>
         <p className="text-xl mb-2 text-white">
           Join 353 candle makers who've already secured founder pricing
@@ -654,7 +654,7 @@ export default function SubscriptionPlansPage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button className="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all shadow-lg text-lg">
-            🔒 Lock In $19/mo Forever
+            🔒 Lock In \$29/mo Forever
           </button>
           <button className="bg-purple-800/50 backdrop-blur-sm text-white px-8 py-4 rounded-lg font-bold hover:bg-purple-800/70 transition-all border-2 border-white/20">
             Schedule a Demo

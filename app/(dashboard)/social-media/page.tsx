@@ -191,7 +191,7 @@ export default function SocialMediaPage() {
               <div className="grid md:grid-cols-2 gap-3 mb-4">
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>30 posts/month on Professional ($19)</span>
+                  <span>30 posts/month on Professional (\$29)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />

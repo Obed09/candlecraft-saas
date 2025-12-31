@@ -25,7 +25,7 @@ const partnersData = [
       signups: 47,
       conversions: 38,
       conversionRate: 24.4,
-      monthlyRevenue: 722, // $19 * 38
+      monthlyRevenue: 722, // \$29 * 38
       totalCommission: 180.50, // 25% of revenue
     },
     plans: {
@@ -380,7 +380,7 @@ export default function AdminPartnersPage() {
                       <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Plan Distribution</p>
                       <div className="space-y-1 text-xs">
                         <div className="flex justify-between">
-                          <span>Professional ($19)</span>
+                          <span>Professional (\$29)</span>
                           <span className="font-semibold">{partner.plans.professional}</span>
                         </div>
                         <div className="flex justify-between">

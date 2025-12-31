@@ -241,7 +241,7 @@ export default function PartnerDashboard() {
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Professional ($19/mo)</span>
+                  <span className="text-sm font-medium">Professional (\$29/mo)</span>
                   <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
                     {partnerData.stats.byPlan.professional} referrals
                   </span>
