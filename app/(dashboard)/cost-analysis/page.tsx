@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, X, RotateCcw, Trash2 } from 'lucide-react'
 
 // Tooltip Component for settings fields
 const Tooltip = ({ text }: { text: string }) => (
@@ -46,6 +46,59 @@ interface CustomCost {
 }
 
 export default function CostAnalysisPage() {
+  // Info banner state
+  const [showBanner, setShowBanner] = useState(true)
+  
+  useEffect(() => {
+    const dismissed = localStorage.getItem('cost-analysis-banner-dismissed')
+    if (dismissed === 'true') setShowBanner(false)
+  }, [])
+
+  const dismissBanner = () => {
+    setShowBanner(false)
+    localStorage.setItem('cost-analysis-banner-dismissed', 'true')
+  }
+
+  // Default values
+  const defaultValues = {
+    materialPrices: {
+      waxPricePerLb: 8.50,
+      fragrancePricePerLb: 40.00,
+      cementPricePerLb: 0.50,
+      wickPrice: 0.25,
+      paintPrice: 0.75,
+    },
+    sellingPrice: 25.00,
+    laborHourlyRate: 15,
+    laborHoursPerUnit: 0.5,
+    monthlyOverhead: 500,
+    monthlySalesGoal: 200,
+  }
+
+  const handleReset = () => {
+    setMaterialPrices(defaultValues.materialPrices)
+    setSellingPrice(defaultValues.sellingPrice)
+    setLaborHourlyRate(defaultValues.laborHourlyRate)
+    setLaborHoursPerUnit(defaultValues.laborHoursPerUnit)
+    setMonthlyOverhead(defaultValues.monthlyOverhead)
+    setMonthlySalesGoal(defaultValues.monthlySalesGoal)
+  }
+
+  const handleClearAll = () => {
+    setMaterialPrices({
+      waxPricePerLb: 0,
+      fragrancePricePerLb: 0,
+      cementPricePerLb: 0,
+      wickPrice: 0,
+      paintPrice: 0,
+    })
+    setSellingPrice(0)
+    setLaborHourlyRate(0)
+    setLaborHoursPerUnit(0)
+    setMonthlyOverhead(0)
+    setMonthlySalesGoal(0)
+  }
+
   const vessels: Vessel[] = [
     { id: 100, name: "Large Shallow", diameter: 8.2, height: 2.36, unit: "in" },
     { id: 101, name: "Medium Cylinder", diameter: 5.43, height: 2.16, unit: "in" },
@@ -200,6 +253,39 @@ export default function CostAnalysisPage() {
   return (
     <TooltipPrimitive.Provider delayDuration={200}>
       <div className="p-8">
+        {/* Info Banner */}
+        {showBanner && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 flex items-start gap-3 mb-8">
+            <div className="flex-shrink-0 text-2xl">📝</div>
+            <div className="flex-1">
+              <p className="text-blue-900 dark:text-blue-100 font-medium">These are example values to get you started!</p>
+              <p className="text-blue-700 dark:text-blue-200 text-sm mt-1">Edit any field to see live calculations for your business. All changes are instant.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="px-3 py-1.5 text-sm border-2 border-purple-500 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset
+              </button>
+              <button
+                onClick={handleClearAll}
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Clear All
+              </button>
+              <button
+                onClick={dismissBanner}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 p-1"
+                aria-label="Dismiss banner"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent flex items-center gap-2">
             💎 Cost Analysis & Profitability

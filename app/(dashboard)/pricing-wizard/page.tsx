@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, X, RotateCcw, Trash2 } from 'lucide-react'
 
 interface Vessel {
   id: number
@@ -34,6 +34,36 @@ interface VesselCalculation {
 }
 
 export default function PricingWizardPage() {
+  // Info banner state
+  const [showBanner, setShowBanner] = useState(true)
+  
+  useEffect(() => {
+    const dismissed = localStorage.getItem('pricing-wizard-banner-dismissed')
+    if (dismissed === 'true') setShowBanner(false)
+  }, [])
+
+  const dismissBanner = () => {
+    setShowBanner(false)
+    localStorage.setItem('pricing-wizard-banner-dismissed', 'true')
+  }
+
+  // Pricing Wizard State
+  const [pricingVesselIndex, setPricingVesselIndex] = useState(0)
+  const [targetMargin, setTargetMargin] = useState(60)
+  const [marketPosition, setMarketPosition] = useState<'budget' | 'mid-range' | 'premium' | 'luxury'>('mid-range')
+
+  const handleReset = () => {
+    setTargetMargin(60)
+    setMarketPosition('mid-range')
+    setPricingVesselIndex(0)
+  }
+
+  const handleClearAll = () => {
+    setTargetMargin(0)
+    setMarketPosition('mid-range')
+    setPricingVesselIndex(0)
+  }
+
   // Material prices (editable)
   const [materialPrices] = useState({
     waxType: 'soy' as 'soy' | 'coconut',
@@ -55,11 +85,6 @@ export default function PricingWizardPage() {
     { id: 104, name: "Flower Shell", diameter: 3.5, height: 4.8, unit: "cm" },
     { id: 105, name: "Bowl Vessel", diameter: 3.25, height: 2.125, unit: "in" }
   ]
-
-  // Pricing Wizard State
-  const [pricingVesselIndex, setPricingVesselIndex] = useState(0)
-  const [targetMargin, setTargetMargin] = useState(60)
-  const [marketPosition, setMarketPosition] = useState<'budget' | 'mid-range' | 'premium' | 'luxury'>('mid-range')
 
   // Calculate volume using cylindrical formula
   const calculateVolume = (diameter: number, height: number, unit: string): number => {
@@ -176,6 +201,39 @@ export default function PricingWizardPage() {
   return (
     <Tooltip.Provider delayDuration={200}>
       <div className="p-8">
+        {/* Info Banner */}
+        {showBanner && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 flex items-start gap-3 mb-8">
+            <div className="flex-shrink-0 text-2xl">📝</div>
+            <div className="flex-1">
+              <p className="text-blue-900 dark:text-blue-100 font-medium">These are example values to get you started!</p>
+              <p className="text-blue-700 dark:text-blue-200 text-sm mt-1">Edit any field to see live calculations for your business. All changes are instant.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="px-3 py-1.5 text-sm border-2 border-purple-500 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset
+              </button>
+              <button
+                onClick={handleClearAll}
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Clear All
+              </button>
+              <button
+                onClick={dismissBanner}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 p-1"
+                aria-label="Dismiss banner"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent flex items-center gap-2">
             💰 Pricing Wizard
