@@ -368,7 +368,7 @@ export default function ChatWidget() {
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
               <Image 
-                src="/CandlePilots logo updated.png" 
+                src="/candlepilots-logo.png" 
                 alt="CandlePilots Logo" 
                 width={32} 
                 height={32}
