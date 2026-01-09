@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { BarcodeGenerator, generateSKU, generateEAN13 } from "@/components/BarcodeGenerator";
-import { Package, QrCode, Barcode as BarcodeIcon, Download, Plus, RefreshCw, HelpCircle } from "lucide-react";
+import { Package, QrCode, Barcode as BarcodeIcon, Download, Plus, RefreshCw, HelpCircle, Printer, Edit2 } from "lucide-react";
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 interface Product {
@@ -13,6 +13,14 @@ interface Product {
   qrData?: string;
 }
 
+interface LabelTemplate {
+  warningText: string;
+  burningInstructions: string;
+  phone: string;
+  email: string;
+  website: string;
+}
+
 export default function BarcodeSystemPage() {
   const [products, setProducts] = useState<Product[]>([
     {
@@ -20,7 +28,7 @@ export default function BarcodeSystemPage() {
       name: "Lavender Bliss Candle",
       sku: "LAV-001",
       barcode: "1234567890123",
-      qrData: "https://www.candlepilots.com/products/lavender-bliss",
+      qrData: "https://www.limenlakay.com/products/lavender-bliss",
     },
   ]);
 
@@ -30,6 +38,15 @@ export default function BarcodeSystemPage() {
   });
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(false);
+  
+  const [labelTemplate, setLabelTemplate] = useState<LabelTemplate>({
+    warningText: "Burn within sight. Keep away from flammable objects. Keep away from children and pets.",
+    burningInstructions: "Trim wick to 1/4\" before lighting. Keep candle free of any foreign materials including matches and wick trimmings. Only burn the candle on a level, fire resistant surface. Do not burn candle for more than four hours at a time. Stop use when only 1/4\" of wax remains.",
+    phone: "561 593 0238",
+    email: "info@limenlakay.com",
+    website: "www.limenlakay.com"
+  });
 
   const handleGenerateSKU = () => {
     if (newProduct.name) {
@@ -46,7 +63,7 @@ export default function BarcodeSystemPage() {
         name: newProduct.name,
         sku: newProduct.sku,
         barcode: generateEAN13(),
-        qrData: `https://www.candlepilots.com/products/${newProduct.sku.toLowerCase()}`,
+        qrData: `https://www.limenlakay.com/products/${newProduct.sku.toLowerCase()}`,
       };
       setProducts([...products, product]);
       setNewProduct({ name: "", sku: "" });
@@ -57,6 +74,10 @@ export default function BarcodeSystemPage() {
   const handleDownload = (productName: string, type: "barcode" | "qr") => {
     // This will be implemented with canvas export
     alert(`Downloading ${type} for ${productName}...`);
+  };
+
+  const handlePrintLabel = () => {
+    window.print();
   };
 
   const handlePrintAll = () => {
@@ -209,6 +230,88 @@ export default function BarcodeSystemPage() {
         </div>
       </div>
 
+      {/* Label Template Editor */}
+      <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-8 print:hidden">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Edit2 className="w-5 h-5 text-purple-600" />
+            Label Template Settings
+          </h3>
+          <button
+            onClick={() => setEditingTemplate(!editingTemplate)}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm"
+          >
+            {editingTemplate ? "Save Template" : "Edit Template"}
+          </button>
+        </div>
+
+        {editingTemplate ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Warning Text
+              </label>
+              <textarea
+                value={labelTemplate.warningText}
+                onChange={(e) => setLabelTemplate({...labelTemplate, warningText: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Burning Instructions
+              </label>
+              <textarea
+                value={labelTemplate.burningInstructions}
+                onChange={(e) => setLabelTemplate({...labelTemplate, burningInstructions: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                rows={4}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  value={labelTemplate.phone}
+                  onChange={(e) => setLabelTemplate({...labelTemplate, phone: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={labelTemplate.email}
+                  onChange={(e) => setLabelTemplate({...labelTemplate, email: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Website
+                </label>
+                <input
+                  type="text"
+                  value={labelTemplate.website}
+                  onChange={(e) => setLabelTemplate({...labelTemplate, website: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-600">
+            Click &quot;Edit Template&quot; to customize your candle warning labels with your business information.
+          </div>
+        )}
+      </div>
+
       {/* Product Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {products.map((product) => (
@@ -220,6 +323,60 @@ export default function BarcodeSystemPage() {
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-1">{product.name}</h3>
               <p className="text-sm text-gray-600">SKU: {product.sku}</p>
+            </div>
+
+            {/* Label Preview with Warning Text */}
+            <div className="mb-6 bg-white border-2 border-gray-300 rounded-lg p-6">
+              <div className="flex items-center justify-center mb-4">
+                {/* Warning Icons */}
+                <div className="flex gap-2">
+                  <div className="w-8 h-8 border-2 border-black rounded-full flex items-center justify-center">
+                    <span className="text-xs">🔥</span>
+                  </div>
+                  <div className="w-8 h-8 border-2 border-black rounded-full flex items-center justify-center">
+                    <span className="text-xs">🔥</span>
+                  </div>
+                  <div className="w-8 h-8 border-2 border-black rounded-full flex items-center justify-center">
+                    <span className="text-xs">👶</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center mb-4">
+                <div className="font-bold text-sm mb-2 flex items-center justify-center gap-1">
+                  <span className="text-lg">⚠️</span> WARNING
+                </div>
+                <p className="text-xs leading-relaxed mb-4">
+                  {labelTemplate.warningText}
+                </p>
+              </div>
+
+              <div className="border-t-2 border-gray-300 pt-4">
+                <div className="font-bold text-sm mb-2 text-center">
+                  BURNING INSTRUCTIONS
+                </div>
+                <p className="text-xs leading-relaxed mb-4">
+                  {labelTemplate.burningInstructions}
+                </p>
+              </div>
+
+              {/* Barcode Section */}
+              <div className="border-t-2 border-gray-300 pt-4 mb-4">
+                <div className="flex justify-center">
+                  {product.barcode && (
+                    <BarcodeGenerator value={product.barcode} type="barcode" format="EAN13" />
+                  )}
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="border-t-2 border-gray-300 pt-4">
+                <div className="text-xs text-center space-y-1">
+                  <div className="font-semibold">📞 {labelTemplate.phone}</div>
+                  <div className="font-semibold">📧 {labelTemplate.email}</div>
+                  <div className="font-semibold">🌐 {labelTemplate.website}</div>
+                </div>
+              </div>
             </div>
 
             {/* Barcode & QR Code */}
@@ -259,6 +416,13 @@ export default function BarcodeSystemPage() {
 
             {/* Actions */}
             <div className="flex gap-2 print:hidden">
+              <button
+                onClick={handlePrintLabel}
+                className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium flex items-center justify-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                Print Label
+              </button>
               <button
                 onClick={() => handleDownload(product.name, "barcode")}
                 className="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition text-sm font-medium"

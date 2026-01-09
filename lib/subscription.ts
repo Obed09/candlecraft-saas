@@ -122,13 +122,20 @@ export async function getUserSubscription(userId: string) {
     return null;
   }
 
-  const plan = (business.subscription?.plan || "free") as SubscriptionPlan;
-  const limits = getPlanLimits(plan);
+  const subscription = business.subscription;
+  
+  // If subscription exists but is incomplete/canceled, treat as free
+  let effectivePlan: SubscriptionPlan = "free";
+  if (subscription && subscription.status === "active") {
+    effectivePlan = subscription.plan as SubscriptionPlan;
+  }
+
+  const limits = getPlanLimits(effectivePlan);
 
   return {
     business,
-    subscription: business.subscription,
-    plan,
+    subscription,
+    plan: effectivePlan,
     limits,
   };
 }

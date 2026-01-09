@@ -78,6 +78,8 @@ function SignUpForm() {
 
     try {
       // Register user with selected plan
+      console.log('Registering user:', { name: formData.name, email: formData.email, plan: selectedPlan });
+      
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -92,12 +94,16 @@ function SignUpForm() {
       });
 
       const data = await response.json();
+      console.log('Registration response:', data);
 
       if (!response.ok) {
+        console.error('Registration failed:', data);
         setError(data.error || "Something went wrong");
         setIsLoading(false);
         return;
       }
+
+      console.log('Registration successful, signing in...');
 
       // Auto sign in after registration
       const result = await signIn("credentials", {
@@ -106,7 +112,10 @@ function SignUpForm() {
         redirect: false,
       });
 
+      console.log('Sign in result:', result);
+
       if (result?.error) {
+        console.error('Sign in failed:', result.error);
         setError("Registration successful but sign in failed. Please try signing in.");
         setIsLoading(false);
         return;

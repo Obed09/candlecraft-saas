@@ -3,14 +3,12 @@ import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-12-15.clover",
-});
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, email, password, plan = "free" } = body;
+
+    console.log('Registration attempt:', { name, email, plan });
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -51,7 +49,12 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('User created:', user.id);
+
     // Create default business for the user
+    // For paid plans, set status to 'incomplete' until payment is confirmed
+    const subscriptionStatus = plan === "free" ? "active" : "incomplete";
+    
     const business = await prisma.business.create({
       data: {
         name: `${name}'s Business`,
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
         subscription: {
           create: {
             plan: plan,
-            status: "active",
+            status: subscriptionStatus,
           },
         },
       },
@@ -70,65 +73,77 @@ export async function POST(request: Request) {
 
     // If paid plan selected, create Stripe checkout session
     if (plan !== "free") {
-      // Create Stripe customer
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: user.name || undefined,
-        metadata: {
-          businessId: business.id,
-          userId: user.id,
-        },
-      });
+      try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+          apiVersion: "2025-12-15.clover",
+        });
 
-      // Update subscription with customer ID
-      await prisma.subscription.update({
-        where: { businessId: business.id },
-        data: { stripeCustomerId: customer.id },
-      });
+        // Create Stripe customer
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.name || undefined,
+          metadata: {
+            businessId: business.id,
+            userId: user.id,
+          },
+        });
 
-      // Price IDs based on plan
-      const priceIds: Record<string, string> = {
-        starter:
-          process.env.STRIPE_STARTER_MONTHLY_PRICE_ID ||
-          "price_starter_monthly",
-        pro: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly",
-        business:
-          process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID ||
-          "price_business_monthly",
-      };
+        console.log('Stripe customer created:', customer.id);
 
-      // Create checkout session
-      const checkoutSession = await stripe.checkout.sessions.create({
-        customer: customer.id,
-        payment_method_types: ["card"],
-        line_items: [
+        // Update subscription with customer ID
+        await prisma.subscription.update({
+          where: { businessId: business.id },
+          data: { stripeCustomerId: customer.id },
+        });
+
+        // Price IDs based on plan
+        const priceIds: Record<string, string> = {
+          starter: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID!,
+          pro: process.env.STRIPE_PRO_MONTHLY_PRICE_ID!,
+          business: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID!,
+        };
+
+        // Create checkout session
+        const checkoutSession = await stripe.checkout.sessions.create({
+          customer: customer.id,
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price: priceIds[plan],
+              quantity: 1,
+            },
+          ],
+          mode: "subscription",
+          success_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?success=true`,
+          cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/sign-up?canceled=true`,
+          metadata: {
+            businessId: business.id,
+            userId: user.id,
+            plan,
+          },
+        });
+
+        console.log('Checkout session created:', checkoutSession.id);
+
+        return NextResponse.json(
           {
-            price: priceIds[plan],
-            quantity: 1,
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+            },
+            plan,
+            checkoutUrl: checkoutSession.url,
           },
-        ],
-        mode: "subscription",
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/sign-up?canceled=true`,
-        metadata: {
-          businessId: business.id,
-          userId: user.id,
-          plan,
-        },
-      });
-
-      return NextResponse.json(
-        {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-          },
-          plan,
-          checkoutUrl: checkoutSession.url,
-        },
-        { status: 201 }
-      );
+          { status: 201 }
+        );
+      } catch (stripeError: any) {
+        console.error('Stripe error:', stripeError);
+        return NextResponse.json(
+          { error: `Payment setup failed: ${stripeError.message}` },
+          { status: 500 }
+        );
+      }
     }
 
     // Free plan - no checkout needed

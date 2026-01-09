@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, Sparkles } from 'lucide-react'
 import * as Tooltip from '@radix-ui/react-tooltip'
+import { AITestResults } from '@/components/AITestResults'
+import { AIAnalysisResult } from '@/lib/aiScentAnalysis'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface ScentBlend {
   name: string
@@ -26,6 +30,79 @@ export default function AIBlenderPage() {
     popularity: 0,
     warning: ''
   })
+
+  // AI Analysis state
+  const [showAIAnalysis, setShowAIAnalysis] = useState(false)
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [userTier, setUserTier] = useState<'free' | 'starter' | 'pro' | 'business'>('free')
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  // Fetch user subscription tier
+  useEffect(() => {
+    const fetchUserTier = async () => {
+      try {
+        const response = await fetch('/api/user/subscription')
+        if (response.ok) {
+          const data = await response.json()
+          setUserTier(data.plan || 'free')
+        }
+      } catch (error) {
+        console.error('Error fetching user tier:', error)
+      }
+    }
+    if (session) {
+      fetchUserTier()
+    }
+  }, [session])
+
+  // Advanced AI Analysis
+  const analyzeBlendAdvanced = async () => {
+    const totalPercent = scentBlends.reduce((sum, blend) => sum + blend.percentage, 0)
+    
+    if (Math.abs(totalPercent - 100) > 0.1) {
+      alert(`Percentages must equal 100% (currently ${totalPercent.toFixed(1)}%)`)
+      return
+    }
+
+    setIsAnalyzing(true)
+    setShowAIAnalysis(true)
+    
+    try {
+      const ingredients = scentBlends.map(blend => ({
+        name: blend.name,
+        percentage: blend.percentage
+      }))
+
+      const response = await fetch('/api/recipes/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          recipeName: 'Custom AI Blend',
+          ingredients
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze blend')
+      }
+
+      const data = await response.json()
+      setAiAnalysis(data.analysis)
+      setUserTier(data.tier || 'free')
+      
+      // Also run simple prediction for quick view
+      predictScentBlend()
+    } catch (error) {
+      console.error('Error analyzing blend:', error)
+      alert('Failed to analyze blend. Please try again.')
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
 
   const predictScentBlend = () => {
     const totalPercent = scentBlends.reduce((sum, blend) => sum + blend.percentage, 0)
@@ -226,7 +303,19 @@ export default function AIBlenderPage() {
                 Math.abs(totalPercentage - 100) < 0.1 
                   ? 'text-green-600 dark:text-green-400' 
                   : 'text-red-600 dark:text-red-400'
-              }`}>
+           dvanced AI Analysis Results */}
+      {showAIAnalysis && aiAnalysis && (
+        <div className="mb-6">
+          <AITestResults
+            analysis={aiAnalysis}
+            tier={userTier}
+            recipeName="Custom AI Blend"
+            onUpgrade={() => router.push('/subscription-plans')}
+          />
+        </div>
+      )}
+
+      {/* Quick A   }`}>
                 {totalPercentage.toFixed(1)}%
               </span>
             </div>

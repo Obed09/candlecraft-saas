@@ -1,11 +1,72 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, Zap, Crown, Building2, GraduationCap } from "lucide-react";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function SubscriptionPlansPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('Session updated:', { status, session });
+  }, [status, session]);
+
+  const handleSelectPlan = async (planId: string) => {
+    console.log('Plan selected:', planId);
+    console.log('Session status:', status);
+    console.log('Session data:', session);
+
+    // If session is still loading, wait
+    if (status === 'loading') {
+      alert('Please wait, loading your session...');
+      return;
+    }
+
+    // Since we're in the dashboard layout, we know the user IS authenticated
+    // The server-side check in layout.tsx already verified this
+    // So we can trust we have a valid session even if useSession hasn't synced yet
+    
+    // If free plan, just show message
+    if (planId === 'free') {
+      alert('You are already on the free plan!');
+      return;
+    }
+
+    // For paid plans, create checkout session
+    console.log('Creating checkout for plan:', planId);
+    setIsLoading(planId);
+    
+    try {
+      const response = await fetch('/api/subscription/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan: planId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      // Redirect to Stripe checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      alert(error.message || 'Failed to start checkout. Please try again.');
+      setIsLoading(null);
+    }
+  };
+
   const plans = [
     {
       name: "Free",
@@ -30,7 +91,6 @@ export default function SubscriptionPlansPage() {
         "No team collaboration"
       ],
       cta: "Get Started Free",
-      ctaLink: "/sign-up?plan=free",
       popular: false,
       badge: null,
       spotsLeft: null,
@@ -64,7 +124,6 @@ export default function SubscriptionPlansPage() {
         "No advanced analytics"
       ],
       cta: "Start 14-Day Trial",
-      ctaLink: "/sign-up?plan=starter",
       popular: true,
       badge: "MOST POPULAR",
       spotsLeft: null,
@@ -99,7 +158,6 @@ export default function SubscriptionPlansPage() {
         "No API access"
       ],
       cta: "Start 14-Day Trial",
-      ctaLink: "/sign-up?plan=pro",
       popular: false,
       badge: null,
       spotsLeft: null,
@@ -136,7 +194,6 @@ export default function SubscriptionPlansPage() {
       ],
       limitations: [],
       cta: "Start 14-Day Trial",
-      ctaLink: "/sign-up?plan=business",
       popular: false,
       badge: "Best for Teams",
       spotsLeft: "289 spots remaining",
@@ -223,6 +280,23 @@ export default function SubscriptionPlansPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Debug info - remove after testing */}
+      {status === 'loading' && (
+        <div className="mb-4 p-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
+          Loading session...
+        </div>
+      )}
+      {session && (
+        <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">
+          Signed in as: {session.user?.email}
+        </div>
+      )}
+      {!session && status === 'unauthenticated' && (
+        <div className="mb-4 p-4 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded">
+          Not signed in
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center mb-12">
         <Badge className="mb-4 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
@@ -316,17 +390,17 @@ export default function SubscriptionPlansPage() {
                 </div>
 
                 {/* CTA Button */}
-                <Link href={plan.ctaLink || `/sign-up?plan=${plan.name.toLowerCase()}`}>
-                  <button
-                    className={`w-full py-3 px-6 rounded-lg font-bold transition-all mb-6 ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                    }`}
-                  >
-                    {plan.cta}
-                  </button>
-                </Link>
+                <button
+                  onClick={() => handleSelectPlan(plan.name.toLowerCase())}
+                  disabled={isLoading === plan.name.toLowerCase()}
+                  className={`w-full py-3 px-6 rounded-lg font-bold transition-all mb-6 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    plan.popular
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+                      : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                  }`}
+                >
+                  {isLoading === plan.name.toLowerCase() ? "Loading..." : plan.cta}
+                </button>
 
                 {/* Features */}
                 <div className="space-y-3">
