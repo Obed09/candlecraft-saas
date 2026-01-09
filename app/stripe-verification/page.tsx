@@ -1,5 +1,7 @@
 "use client";
 
+// Stripe Business Verification Page - v1.0.1
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
