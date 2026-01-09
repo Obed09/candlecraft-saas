@@ -91,19 +91,7 @@ export async function POST(request: NextRequest) {
     // Perform full AI analysis for paid users
     const analysis = analyzeScent(scentIngredients, tier);
 
-    // Log the analysis for tracking
-    await prisma.recipeAnalysis.create({
-      data: {
-        userId: user.id,
-        recipeName: recipeName || 'Unnamed Recipe',
-        ingredients: JSON.stringify(ingredients),
-        analysisResult: JSON.stringify(analysis),
-        tier: tier
-      }
-    }).catch(err => {
-      // If table doesn't exist, just log to console
-      console.log('Recipe analysis logging skipped:', err.message);
-    });
+    // TODO: Add recipe analysis tracking when RecipeAnalysis model is added to schema
 
     return NextResponse.json({
       success: true,
