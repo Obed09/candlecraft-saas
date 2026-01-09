@@ -58,7 +58,7 @@ export default function StripeVerificationPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-gray-700 dark:text-gray-300">
-              <strong>Business Name:</strong> CandlePilots (Lumen Lakay LLC)
+              <strong>Business Name:</strong> CandlePilots a Division of Limen Lakay LLC
             </p>
             <p className="text-gray-700 dark:text-gray-300">
               <strong>Website:</strong> www.candlepilots.com
