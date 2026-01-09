@@ -1,4 +1,5 @@
 'use client'
+// Build: 2026-01-09 - Vercel deployment fix
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
