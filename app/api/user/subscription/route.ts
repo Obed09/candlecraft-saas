@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
       status: subscription.status,
       stripeCustomerId: subscription.stripeCustomerId,
       stripeSubscriptionId: subscription.stripeSubscriptionId,
-      currentPeriodEnd: subscription.currentPeriodEnd,
+      currentPeriodEnd: subscription.stripeCurrentPeriodEnd,
       features
     });
 
