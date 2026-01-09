@@ -303,7 +303,15 @@ export default function AIBlenderPage() {
                 Math.abs(totalPercentage - 100) < 0.1 
                   ? 'text-green-600 dark:text-green-400' 
                   : 'text-red-600 dark:text-red-400'
-           dvanced AI Analysis Results */}
+              }`}>
+                {totalPercentage.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Advanced AI Analysis Results */}
       {showAIAnalysis && aiAnalysis && (
         <div className="mb-6">
           <AITestResults
@@ -314,14 +322,6 @@ export default function AIBlenderPage() {
           />
         </div>
       )}
-
-      {/* Quick A   }`}>
-                {totalPercentage.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* AI Prediction Results */}
       {blendPrediction.profile && (
