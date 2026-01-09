@@ -25,8 +25,16 @@ export async function POST(request: NextRequest) {
       where: { email: session.user.email },
       select: {
         id: true,
-        subscriptionPlan: true,
-        subscriptionStatus: true
+        business: {
+          select: {
+            subscription: {
+              select: {
+                plan: true,
+                status: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -38,8 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get subscription tier
-    const subscription = await getUserSubscription(user.id);
-    const tier = subscription.plan as SubscriptionTier;
+    const tier = (user.business?.subscription?.plan || 'free') as SubscriptionTier;
 
     // Parse request body
     const body = await request.json();
