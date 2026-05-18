@@ -124,10 +124,31 @@ export async function getUserSubscription(userId: string) {
 
   const subscription = business.subscription;
   
-  // If subscription exists but is incomplete/canceled, treat as free
+  // If locked to free tier (demo/presentation users), always return free
+  if (subscription?.isLockedFree) {
+    return {
+      business,
+      subscription,
+      plan: "free" as SubscriptionPlan,
+      limits: getPlanLimits("free"),
+      isLockedFree: true,
+      isOnTrial: false,
+      trialEndsAt: null,
+    };
+  }
+
+  // Determine effective plan
   let effectivePlan: SubscriptionPlan = "free";
-  if (subscription && subscription.status === "active") {
-    effectivePlan = subscription.plan as SubscriptionPlan;
+  const now = new Date();
+
+  if (subscription) {
+    if (
+      subscription.status === "active" ||
+      subscription.status === "trialing" ||
+      (subscription.isOnTrial && subscription.trialEndsAt && subscription.trialEndsAt > now)
+    ) {
+      effectivePlan = subscription.plan as SubscriptionPlan;
+    }
   }
 
   const limits = getPlanLimits(effectivePlan);
@@ -137,6 +158,9 @@ export async function getUserSubscription(userId: string) {
     subscription,
     plan: effectivePlan,
     limits,
+    isLockedFree: false,
+    isOnTrial: subscription?.isOnTrial ?? false,
+    trialEndsAt: subscription?.trialEndsAt ?? null,
   };
 }
 

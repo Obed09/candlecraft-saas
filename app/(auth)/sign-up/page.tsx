@@ -41,9 +41,11 @@ function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedPlan = searchParams.get("plan") || "free";
+  const isLockedFree = searchParams.get("locked") === "true";
   
-  const [step, setStep] = useState<"plan" | "details">("plan");
-  const [selectedPlan, setSelectedPlan] = useState(preselectedPlan);
+  // If locked=true, skip plan selection and force free
+  const [step, setStep] = useState<"plan" | "details">(isLockedFree ? "details" : "plan");
+  const [selectedPlan, setSelectedPlan] = useState(isLockedFree ? "free" : preselectedPlan);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -90,6 +92,7 @@ function SignUpForm() {
           email: formData.email,
           password: formData.password,
           plan: selectedPlan,
+          locked: isLockedFree,
         }),
       });
 
@@ -128,7 +131,7 @@ function SignUpForm() {
         router.push("/analytics");
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       setError("Something went wrong");
       setIsLoading(false);
     }
@@ -230,22 +233,32 @@ function SignUpForm() {
       <div className="w-full max-w-2xl">
         <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8">
           <div className="mb-8">
-            <button
-              onClick={() => setStep("plan")}
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white mb-4 flex items-center"
-            >
-              ← Back to plans
-            </button>
+            {!isLockedFree && (
+              <button
+                onClick={() => setStep("plan")}
+                className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white mb-4 flex items-center"
+              >
+                ← Back to plans
+              </button>
+            )}
             <div className="text-center">
               <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
                 Create Your Account
               </h1>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-                You selected:{" "}
-                <span className="font-semibold text-zinc-900 dark:text-white">
-                  {selectedPlanInfo.name} Plan
-                </span>
-              </p>
+              {isLockedFree ? (
+                <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+                  <span className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-1 rounded-full border border-gray-300 dark:border-gray-600">
+                    🔒 Free Demo Account
+                  </span>
+                </p>
+              ) : (
+                <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+                  You selected:{" "}
+                  <span className="font-semibold text-zinc-900 dark:text-white">
+                    {selectedPlanInfo.name} Plan
+                  </span>
+                </p>
+              )}
             </div>
           </div>
 

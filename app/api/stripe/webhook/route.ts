@@ -49,20 +49,24 @@ export async function POST(request: Request) {
 
           // Get subscription details
           const subscription = await stripe.subscriptions.retrieve(subscriptionId) as Stripe.Subscription;
+          const isTrialing = subscription.status === 'trialing';
+          const trialEnd = (subscription as any).trial_end;
 
           // Update database
           await prisma.subscription.update({
             where: { businessId },
             data: {
               plan,
-              status: "active",
+              status: isTrialing ? 'trialing' : 'active',
               stripeSubscriptionId: subscriptionId,
               stripePriceId: subscription.items.data[0].price.id,
               stripeCurrentPeriodEnd: (subscription as any).current_period_end ? new Date((subscription as any).current_period_end * 1000) : null,
+              isOnTrial: isTrialing,
+              trialEndsAt: trialEnd ? new Date(trialEnd * 1000) : null,
             },
           });
 
-          console.log(`Subscription activated for business ${businessId}`);
+          console.log(`Subscription ${isTrialing ? 'trial started' : 'activated'} for business ${businessId}`);
         }
         break;
       }
@@ -76,16 +80,20 @@ export async function POST(request: Request) {
         });
 
         if (dbSubscription) {
+          const isTrialing = subscription.status === 'trialing';
+          const trialEnd = (subscription as any).trial_end;
           await prisma.subscription.update({
             where: { id: dbSubscription.id },
             data: {
-              status: subscription.status === "active" ? "active" : subscription.status,
+              status: subscription.status,
               stripeCurrentPeriodEnd: (subscription as any).current_period_end ? new Date((subscription as any).current_period_end * 1000) : null,
               stripePriceId: subscription.items.data[0].price.id,
+              isOnTrial: isTrialing,
+              trialEndsAt: trialEnd ? new Date(trialEnd * 1000) : (isTrialing ? undefined : null),
             },
           });
 
-          console.log(`Subscription updated: ${subscription.id}`);
+          console.log(`Subscription updated: ${subscription.id} (status: ${subscription.status})`);
         }
         break;
       }
@@ -107,6 +115,8 @@ export async function POST(request: Request) {
               stripeSubscriptionId: null,
               stripePriceId: null,
               stripeCurrentPeriodEnd: null,
+              isOnTrial: false,
+              trialEndsAt: null,
             },
           });
 

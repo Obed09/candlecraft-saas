@@ -3,33 +3,32 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown, Building2, GraduationCap } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, Building2, GraduationCap, Lock } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 export default function SubscriptionPlansPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { status } = useSession();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isLockedFree, setIsLockedFree] = useState(false);
 
   useEffect(() => {
-    console.log('Session updated:', { status, session });
-  }, [status, session]);
+    // Check if this user is a locked free (demo) account
+    fetch('/api/subscription')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.subscription?.isLockedFree) setIsLockedFree(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSelectPlan = async (planId: string) => {
-    console.log('Plan selected:', planId);
-    console.log('Session status:', status);
-    console.log('Session data:', session);
+    if (status === 'loading') return;
 
-    // If session is still loading, wait
-    if (status === 'loading') {
-      alert('Please wait, loading your session...');
+    // Block locked-free (demo) accounts from upgrading
+    if (isLockedFree) {
+      alert('This is a demo account. Please contact us to upgrade to a paid plan.');
       return;
     }
-
-    // Since we're in the dashboard layout, we know the user IS authenticated
-    // The server-side check in layout.tsx already verified this
-    // So we can trust we have a valid session even if useSession hasn't synced yet
     
     // If free plan, just show message
     if (planId === 'free') {
@@ -38,7 +37,6 @@ export default function SubscriptionPlansPage() {
     }
 
     // For paid plans, create checkout session
-    console.log('Creating checkout for plan:', planId);
     setIsLoading(planId);
     
     try {
@@ -280,20 +278,13 @@ export default function SubscriptionPlansPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Debug info - remove after testing */}
-      {status === 'loading' && (
-        <div className="mb-4 p-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
-          Loading session...
-        </div>
-      )}
-      {session && (
-        <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">
-          Signed in as: {session.user?.email}
-        </div>
-      )}
-      {!session && status === 'unauthenticated' && (
-        <div className="mb-4 p-4 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded">
-          Not signed in
+      {/* Locked demo banner */}
+      {isLockedFree && (
+        <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center gap-3 text-gray-700 dark:text-gray-300">
+          <Lock className="w-5 h-5 flex-shrink-0" />
+          <span className="text-sm font-medium">
+            You are using a <strong>Free Demo Account</strong>. To unlock paid features, please contact us to upgrade.
+          </span>
         </div>
       )}
 
@@ -306,7 +297,7 @@ export default function SubscriptionPlansPage() {
           Lock In Founder Pricing Forever
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-4">
-          Join the first 1,000 candle makers to get lifetime founder pricing. Once it's gone, it's gone forever.
+          Join the first 1,000 candle makers to get lifetime founder pricing. Once it&apos;s gone, it&apos;s gone forever.
         </p>
         <div className="flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-2">
@@ -392,14 +383,18 @@ export default function SubscriptionPlansPage() {
                 {/* CTA Button */}
                 <button
                   onClick={() => handleSelectPlan(plan.name.toLowerCase())}
-                  disabled={isLoading === plan.name.toLowerCase()}
+                  disabled={isLoading === plan.name.toLowerCase() || (isLockedFree && plan.name.toLowerCase() !== 'free')}
                   className={`w-full py-3 px-6 rounded-lg font-bold transition-all mb-6 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    plan.popular
+                    plan.popular && !isLockedFree
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
                       : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                   }`}
                 >
-                  {isLoading === plan.name.toLowerCase() ? "Loading..." : plan.cta}
+                  {isLoading === plan.name.toLowerCase()
+                    ? "Loading..."
+                    : isLockedFree && plan.name.toLowerCase() !== 'free'
+                    ? "🔒 Contact Us to Upgrade"
+                    : plan.cta}
                 </button>
 
                 {/* Features */}
@@ -450,7 +445,7 @@ export default function SubscriptionPlansPage() {
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
               <div className="text-4xl mb-3">📚</div>
-              <h3 className="font-bold text-lg mb-2">Beginner's Masterclass</h3>
+              <h3 className="font-bold text-lg mb-2">Beginner&apos;s Masterclass</h3>
               <p className="text-sm text-white/80 mb-2">10+ hours of expert training</p>
               <p className="text-2xl font-bold">$297 Value</p>
             </div>
@@ -479,7 +474,7 @@ export default function SubscriptionPlansPage() {
         <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Zero Risk. All Reward.</h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            We're so confident you'll love CandlePilots, we've eliminated all the risk
+            We&apos;re so confident you&apos;ll love CandlePilots, we&apos;ve eliminated all the risk
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -498,7 +493,7 @@ export default function SubscriptionPlansPage() {
             </div>
             <h3 className="font-bold text-lg mb-2">Free Data Migration</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              We'll import all your spreadsheets for you
+              We&apos;ll import all your spreadsheets for you
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
@@ -594,7 +589,7 @@ export default function SubscriptionPlansPage() {
             Detailed Feature Comparison
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            See exactly what's included in each plan
+            See exactly what&apos;s included in each plan
           </p>
         </div>
 
@@ -718,10 +713,10 @@ export default function SubscriptionPlansPage() {
           </Badge>
         </div>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Don't Miss Your Chance to Lock In \$29/mo Forever
+          Don&apos;t Miss Your Chance to Lock In $29/mo Forever
         </h2>
         <p className="text-xl mb-2 text-white">
-          Join 353 candle makers who've already secured founder pricing
+          Join 353 candle makers who&apos;ve already secured founder pricing
         </p>
         <p className="text-lg mb-8 text-purple-100">
           Only 647 spots remaining • Offer ends in 72 hours

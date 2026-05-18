@@ -8,7 +8,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")  // Temporarily disabled - direct connection not working
 }
 
 // NextAuth Models
@@ -79,9 +79,27 @@ model Business {
   customers         Customer[]
   orders            Order[]
   expenses          Expense[]
+  customVessels     CustomVessel[]
   
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+}
+
+model CustomVessel {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name        String
+  diameter    Float
+  height      Float
+  unit        String   @default("cm")
+  imageData   String?  @db.Text
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
 }
 
 model Subscription {
@@ -94,8 +112,15 @@ model Subscription {
   stripePriceId       String?
   stripeCurrentPeriodEnd DateTime?
   
-  plan                String    @default("free") // free, starter, pro, enterprise
-  status              String    @default("active") // active, canceled, past_due
+  plan                String    @default("free") // free, starter, pro, business
+  status              String    @default("active") // active, trialing, canceled, past_due, incomplete
+  
+  // Trial tracking
+  trialEndsAt         DateTime?
+  isOnTrial           Boolean   @default(false)
+  
+  // Demo / locked free tier (for presentations / shared demo links)
+  isLockedFree        Boolean   @default(false)
   
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt

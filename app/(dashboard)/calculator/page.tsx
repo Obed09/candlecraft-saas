@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { HelpCircle, X, RotateCcw, Trash2 } from 'lucide-react'
+import { HelpCircle, X, RotateCcw, Trash2, ImagePlus } from 'lucide-react'
 
 interface Vessel {
   id: number
+  dbId?: string
   name: string
   diameter: number
   height: number
@@ -120,6 +121,31 @@ export default function VesselCalculator() {
 
   // Custom Vessel Management
   const [customVessels, setCustomVessels] = useState<Vessel[]>([])
+  const [customVesselImages, setCustomVesselImages] = useState<{[key: number]: string}>({})
+  // Load saved vessels from DB on mount
+  useEffect(() => {
+    fetch('/api/user/custom-vessels')
+      .then(r => r.json())
+      .then(data => {
+        if (data.vessels?.length) {
+          const loaded: Vessel[] = data.vessels.map((v: { id: string; name: string; diameter: number; height: number; unit: string; imageData?: string }, i: number) => ({
+            id: 200 + i,
+            dbId: v.id,
+            name: v.name,
+            diameter: v.diameter,
+            height: v.height,
+            unit: v.unit
+          }))
+          setCustomVessels(loaded)
+          const imgs: {[key: number]: string} = {}
+          data.vessels.forEach((v: { id: string; imageData?: string }, i: number) => {
+            if (v.imageData) imgs[200 + i] = v.imageData
+          })
+          setCustomVesselImages(imgs)
+        }
+      })
+      .catch(console.error)
+  }, [])
   const [showAddVesselModal, setShowAddVesselModal] = useState(false)
   const [newVessel, setNewVessel] = useState({
     name: '',
@@ -128,6 +154,25 @@ export default function VesselCalculator() {
     unit: 'cm' as 'cm' | 'in',
     imageName: ''
   })
+  const [newVesselImage, setNewVesselImage] = useState<string>('')
+  const newVesselImageRef = useRef<HTMLInputElement>(null)
+
+  const compressVesselImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      img.onload = () => {
+        const maxW = 600
+        let { width, height } = img
+        if (width > maxW) { height = (height * maxW) / width; width = maxW }
+        canvas.width = width; canvas.height = height
+        ctx?.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', 0.8))
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
 
   // Combine default vessels with custom vessels
   const allVessels = [...vessels, ...customVessels]
@@ -244,29 +289,63 @@ export default function VesselCalculator() {
   }))
 
   // Custom Vessel Functions
-  const addCustomVessel = () => {
+  const addCustomVessel = async () => {
     if (!newVessel.name || newVessel.diameter <= 0 || newVessel.height <= 0) {
       alert('Please fill all vessel details')
       return
     }
 
-    const customVessel: Vessel = {
-      id: 200 + customVessels.length,
-      name: newVessel.name,
-      diameter: newVessel.diameter,
-      height: newVessel.height,
-      unit: newVessel.unit
+    try {
+      const res = await fetch('/api/user/custom-vessels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newVessel.name,
+          diameter: newVessel.diameter,
+          height: newVessel.height,
+          unit: newVessel.unit,
+          imageData: newVesselImage || null
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+
+      const newId = 200 + customVessels.length
+      const customVessel: Vessel = {
+        id: newId,
+        dbId: data.vessel.id,
+        name: newVessel.name,
+        diameter: newVessel.diameter,
+        height: newVessel.height,
+        unit: newVessel.unit
+      }
+
+      setCustomVessels(prev => [...prev, customVessel])
+      if (newVesselImage) {
+        setCustomVesselImages(prev => ({ ...prev, [newId]: newVesselImage }))
+      }
+    } catch (err) {
+      console.error('Failed to save vessel:', err)
+      alert('Failed to save vessel. Please try again.')
     }
 
-    setCustomVessels([...customVessels, customVessel])
     setShowAddVesselModal(false)
     setNewVessel({ name: '', diameter: 0, height: 0, unit: 'cm', imageName: '' })
+    setNewVesselImage('')
   }
 
-  const deleteCustomVessel = (id: number) => {
-    if (confirm('Delete this custom vessel?')) {
-      setCustomVessels(customVessels.filter(v => v.id !== id))
+  const deleteCustomVessel = async (id: number) => {
+    if (!confirm('Delete this custom vessel?')) return
+    const vessel = customVessels.find(v => v.id === id)
+    if (vessel?.dbId) {
+      try {
+        await fetch(`/api/user/custom-vessels/${vessel.dbId}`, { method: 'DELETE' })
+      } catch (err) {
+        console.error('Failed to delete vessel from DB:', err)
+      }
     }
+    setCustomVessels(prev => prev.filter(v => v.id !== id))
+    setCustomVesselImages(prev => { const next = { ...prev }; delete next[id]; return next })
   }
 
   // Profit calculations
@@ -456,7 +535,7 @@ export default function VesselCalculator() {
 
         {/* Vessel Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          {vesselCalculations.map((vesselCalc, idx) => {
+          {vesselCalculations.map((vesselCalc) => {
             const { vessel, calc } = vesselCalc
             const isCustom = vessel.id >= 200
 
@@ -485,9 +564,18 @@ export default function VesselCalculator() {
                   <h3 className="font-bold text-lg">{vessel.name}</h3>
                 </CardHeader>
                 <CardContent className="p-4 space-y-3">
-                  {/* Vessel Icon */}
-                  <div className="relative w-full h-20 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-lg flex items-center justify-center">
-                    <span className="text-6xl">🕯️</span>
+                  {/* Vessel Image / Icon */}
+                  <div className="relative w-full h-24 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-lg flex items-center justify-center overflow-hidden">
+                    {isCustom && customVesselImages[vessel.id] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={customVesselImages[vessel.id]}
+                        alt={vessel.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-5xl">🕯️</span>
+                    )}
                   </div>
 
                   {/* Remove image rendering to prevent 404 errors
@@ -777,7 +865,7 @@ export default function VesselCalculator() {
                 'Blend wax = 0.91 g/cm³'
               }</li>
               <li>• <strong>Cement Density:</strong> 2.4 g/cm³ (for concrete/cement vessels)</li>
-              <li>• <strong>Wick Count:</strong> 1 wick for vessels ≤4" diameter, 2 wicks for vessels &gt;4" diameter</li>
+              <li>• <strong>Wick Count:</strong> 1 wick for vessels ≤4&quot; diameter, 2 wicks for vessels &gt;4&quot; diameter</li>
               <li>• <strong>Unit Conversions:</strong> 1 inch = 2.54 cm, 1 oz = 29.5735 cm³, 1 lb = 453.6 grams</li>
               <li>• <strong>Price Updates:</strong> Remember to update material prices regularly based on your supplier costs</li>
             </ul>
@@ -791,19 +879,19 @@ export default function VesselCalculator() {
             onClick={() => setShowAddVesselModal(false)}
           >
             <div
-              className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full"
+              className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6 rounded-t-2xl">
                 <h2 className="text-2xl font-bold">➕ Add Custom Vessel</h2>
                 <button
-                  onClick={() => setShowAddVesselModal(false)}
-                  className="absolute top-4 right-4 bg-white text-purple-600 w-10 h-10 rounded-full font-bold text-xl hover:bg-gray-100 transition-all"
-                >
-                  ×
-                </button>
-              </div>
-
+                    onClick={() => setShowAddVesselModal(false)}
+                    className="absolute top-4 right-4 bg-white text-purple-600 w-10 h-10 rounded-full font-bold text-xl hover:bg-gray-100 transition-all"
+                    type="button"
+                  >
+                    ×
+                  </button>
+                </div>
               <div className="p-6 space-y-4">
                 <div>
                   <Label className="text-gray-900 dark:text-gray-100 font-semibold mb-2 block">Vessel Name</Label>
@@ -853,6 +941,47 @@ export default function VesselCalculator() {
                   </select>
                 </div>
 
+                {/* Image Upload */}
+                <div>
+                  <Label className="text-gray-900 dark:text-gray-100 font-semibold mb-2 block">Vessel Image <span className="text-gray-400 font-normal">(optional)</span></Label>
+                  <input
+                    ref={newVesselImageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const compressed = await compressVesselImage(file)
+                        setNewVesselImage(compressed)
+                      }
+                    }}
+                  />
+                  {newVesselImage ? (
+                    <div className="relative rounded-xl overflow-hidden border-2 border-purple-300 dark:border-purple-700">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={newVesselImage} alt="Vessel preview" className="w-full h-40 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => { setNewVesselImage(''); if (newVesselImageRef.current) newVesselImageRef.current.value = '' }}
+                        className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-lg transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => newVesselImageRef.current?.click()}
+                      className="w-full h-32 border-2 border-dashed border-purple-300 dark:border-purple-700 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all cursor-pointer text-gray-500 dark:text-gray-400"
+                    >
+                      <ImagePlus className="w-8 h-8 text-purple-400" />
+                      <span className="text-sm font-medium">Click to upload vessel photo</span>
+                      <span className="text-xs">JPG, PNG, WebP supported</span>
+                    </button>
+                  )}
+                </div>
+
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={addCustomVessel}
@@ -861,7 +990,7 @@ export default function VesselCalculator() {
                     ✅ Add Vessel
                   </button>
                   <button
-                    onClick={() => setShowAddVesselModal(false)}
+                    onClick={() => { setShowAddVesselModal(false); setNewVesselImage('') }}
                     className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-xl font-bold transition-all"
                   >
                     Cancel

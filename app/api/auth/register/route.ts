@@ -6,7 +6,7 @@ import Stripe from "stripe";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, password, plan = "free" } = body;
+    const { name, email, password, plan = "free", locked = false } = body;
 
     console.log('Registration attempt:', { name, email, plan });
 
@@ -53,7 +53,9 @@ export async function POST(request: Request) {
 
     // Create default business for the user
     // For paid plans, set status to 'incomplete' until payment is confirmed
+    // For locked (demo) free users, mark isLockedFree
     const subscriptionStatus = plan === "free" ? "active" : "incomplete";
+    const trialEndsAt = plan === "free" ? null : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     
     const business = await prisma.business.create({
       data: {
@@ -63,6 +65,9 @@ export async function POST(request: Request) {
           create: {
             plan: plan,
             status: subscriptionStatus,
+            isLockedFree: locked === true || locked === "true",
+            trialEndsAt,
+            isOnTrial: false,
           },
         },
       },
@@ -116,6 +121,14 @@ export async function POST(request: Request) {
           mode: "subscription",
           success_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?success=true`,
           cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/sign-up?canceled=true`,
+          subscription_data: {
+            trial_period_days: 14,
+            metadata: {
+              businessId: business.id,
+              userId: user.id,
+              plan,
+            },
+          },
           metadata: {
             businessId: business.id,
             userId: user.id,

@@ -47,6 +47,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is on a locked free tier (demo accounts)
+    const userBusiness = await prisma.business.findFirst({
+      where: { user: { email: session.user.email } },
+      include: { subscription: true },
+    });
+    if (userBusiness?.subscription?.isLockedFree) {
+      return NextResponse.json(
+        { error: 'Demo accounts cannot be upgraded. Please contact support.' },
+        { status: 403 }
+      );
+    }
+
     // Get user with business and subscription
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -158,6 +170,7 @@ export async function POST(request: NextRequest) {
           plan,
         },
         subscription_data: {
+          trial_period_days: 14,
           metadata: {
             businessId: business.id,
             userId: user.id,
