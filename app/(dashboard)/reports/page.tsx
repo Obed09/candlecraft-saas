@@ -41,7 +41,6 @@ interface AnalyticsData {
 export default function ReportsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     fetchAnalytics();
@@ -59,28 +58,6 @@ export default function ReportsPage() {
       console.error("Failed to fetch analytics:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const seedSampleData = async () => {
-    if (!confirm("This will create sample customers, products, and orders for demo purposes. Continue?")) {
-      return;
-    }
-
-    try {
-      setSeeding(true);
-      const response = await fetch("/api/seed-data", { method: "POST" });
-      if (response.ok) {
-        alert("Sample data created successfully! Refreshing analytics...");
-        await fetchAnalytics();
-      } else {
-        alert("Failed to create sample data. Please try again.");
-      }
-    } catch (error) {
-      console.error("Seed error:", error);
-      alert("An error occurred while creating sample data.");
-    } finally {
-      setSeeding(false);
     }
   };
 
@@ -110,15 +87,8 @@ export default function ReportsPage() {
           <BarChart3 className="w-16 h-16 text-yellow-600 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-900 mb-3">No Data Available</h2>
           <p className="text-gray-600 mb-6">
-            Start creating orders and tracking expenses to see your analytics here, or try sample data to see how it works.
+            Start creating orders and tracking expenses to see your analytics here.
           </p>
-          <button
-            onClick={seedSampleData}
-            disabled={seeding}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {seeding ? "Creating Sample Data..." : "Load Sample Data"}
-          </button>
         </div>
       </div>
     );

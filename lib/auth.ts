@@ -4,7 +4,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { getOrCreateOpenAccessUser } from "@/lib/openAccess";
 
 const prisma = new PrismaClient();
 
@@ -18,47 +17,53 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        try {
-          if (credentials?.email && credentials?.password) {
-            const user = await prisma.user.findUnique({
-              where: {
-                email: credentials.email,
-              },
-              include: {
-                business: {
-                  include: {
-                    subscription: true,
-                  },
-                },
-              },
-            });
-
-            if (user?.password) {
-              const isCorrectPassword = await bcrypt.compare(
-                credentials.password,
-                user.password
-              );
-
-              if (isCorrectPassword) {
-                return {
-                  id: user.id,
-                  email: user.email!,
-                  name: user.name!,
-                  role: user.role,
-                  businessId: user.business?.id,
-                  subscriptionPlan: user.business?.subscription?.plan || "free",
-                  subscriptionStatus:
-                    user.business?.subscription?.status || "active",
-                } as any;
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Credential lookup failed, using open access", error);
+        // No silent fallback: invalid or missing credentials must FAIL
+        // authentication, not bind the visitor to a shared admin account.
+        if (!credentials?.email || !credentials?.password) {
+          return null;
         }
 
-        const openAccess = await getOrCreateOpenAccessUser();
-        return openAccess as any;
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+            include: {
+              business: {
+                include: {
+                  subscription: true,
+                },
+              },
+            },
+          });
+
+          if (!user?.password) {
+            return null;
+          }
+
+          const isCorrectPassword = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isCorrectPassword) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email!,
+            name: user.name!,
+            role: user.role,
+            businessId: user.business?.id,
+            subscriptionPlan: user.business?.subscription?.plan || "free",
+            subscriptionStatus:
+              user.business?.subscription?.status || "active",
+          } as any;
+        } catch (error) {
+          console.error("Credential lookup failed", error);
+          return null;
+        }
       },
     }),
   ],

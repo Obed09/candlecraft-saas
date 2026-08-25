@@ -1,13 +1,27 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getOrCreateOpenAccessUser, OpenAccessUser } from "@/lib/openAccess";
 
 export type AppSession = {
-  user: OpenAccessUser;
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+    role: string;
+    businessId?: string;
+    subscriptionPlan?: string;
+    subscriptionStatus?: string;
+  };
   expires: string;
 };
 
-export async function getAppSession(): Promise<AppSession> {
+/**
+ * Resolves the current authenticated session.
+ *
+ * Returns `null` for any unauthenticated request — there is intentionally NO
+ * fallback/backdoor user. Callers must treat `null` as "not signed in" and
+ * either redirect to /sign-in (pages) or return a 401 (API routes).
+ */
+export async function getAppSession(): Promise<AppSession | null> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -16,25 +30,19 @@ export async function getAppSession(): Promise<AppSession> {
         user: {
           id: session.user.id,
           email: session.user.email,
-          name: session.user.name || "CandlePilots",
-          role: session.user.role || "ADMIN",
-          businessId: session.user.businessId || "",
-          subscriptionPlan: session.user.subscriptionPlan || "pro",
-          subscriptionStatus: session.user.subscriptionStatus || "active",
+          name: session.user.name || null,
+          role: session.user.role || "USER",
+          businessId: (session.user as any).businessId || undefined,
+          subscriptionPlan: (session.user as any).subscriptionPlan || undefined,
+          subscriptionStatus:
+            (session.user as any).subscriptionStatus || undefined,
         },
-        expires:
-          session.expires ||
-          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        expires: session.expires,
       };
     }
   } catch (error) {
-    console.error("Session lookup failed, using open access", error);
+    console.error("Session lookup failed", error);
   }
 
-  const user = await getOrCreateOpenAccessUser();
-
-  return {
-    user,
-    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-  };
+  return null;
 }
