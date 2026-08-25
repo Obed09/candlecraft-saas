@@ -146,6 +146,61 @@ export default function VesselCalculator() {
       })
       .catch(console.error)
   }, [])
+  // Load persisted calculator config (material prices / fill% / fragrance load)
+  // from the DB-backed API on mount. If nothing is persisted, the API returns
+  // its in-memory defaults, so the UI always reflects a real, loadable state.
+  useEffect(() => {
+    fetch('/api/user/calculator-config')
+      .then(r => r.json())
+      .then(data => {
+        if (data?.config) {
+          const c = data.config
+          setMaterialPrices(prev => ({
+            ...prev,
+            waxPricePerLb: (c.waxPrice ?? prev.waxPricePerLb),
+            fragrancePricePerLb: (c.fragrancePrice ?? prev.fragrancePricePerLb),
+            cementPricePerLb: (c.cementPrice ?? prev.cementPricePerLb),
+            wickPrice: (c.wickPrice ?? prev.wickPrice),
+            paintPrice: (c.paintPrice ?? prev.paintPrice),
+            fillPercent: (c.defaultFillPercent ?? prev.fillPercent),
+            fragranceLoad: (c.defaultFragranceLoad ?? prev.fragranceLoad),
+          }))
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const [configSaving, setConfigSaving] = useState(false)
+  // Persist the current calculator settings so they survive refresh.
+  const saveCalculatorConfig = async () => {
+    setConfigSaving(true)
+    try {
+      const res = await fetch('/api/user/calculator-config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          waxPrice: materialPrices.waxPricePerLb,
+          fragrancePrice: materialPrices.fragrancePricePerLb,
+          cementPrice: materialPrices.cementPricePerLb,
+          wickPrice: materialPrices.wickPrice,
+          paintPrice: materialPrices.paintPrice,
+          defaultFillPercent: materialPrices.fillPercent,
+          defaultFragranceLoad: materialPrices.fragranceLoad,
+        }),
+      })
+      if (res.ok) {
+        alert('Calculator settings saved')
+      } else {
+        alert('Failed to save calculator settings')
+      }
+    } catch (error) {
+      console.error('Error saving calculator config:', error)
+      alert('Failed to save calculator settings')
+    } finally {
+      setConfigSaving(false)
+    }
+  }
+
   const [showAddVesselModal, setShowAddVesselModal] = useState(false)
   const [newVessel, setNewVessel] = useState({
     name: '',
@@ -529,6 +584,15 @@ export default function VesselCalculator() {
                   className="border-amber-300 dark:border-amber-700 text-gray-900 dark:text-white"
                 />
               </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={saveCalculatorConfig}
+                disabled={configSaving}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-bold transition-all"
+              >
+                {configSaving ? '💾 Saving...' : '💾 Save Settings'}
+              </button>
             </div>
           </CardContent>
         </Card>

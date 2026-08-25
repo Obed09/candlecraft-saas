@@ -64,8 +64,9 @@ export default function PricingWizardPage() {
     setPricingVesselIndex(0)
   }
 
-  // Material prices (editable)
-  const [materialPrices] = useState({
+  // Material prices (editable). Grounded in the persisted calculator config
+  // (BusinessConfig) so pricing reflects real material costs, not placeholders.
+  const [materialPrices, setMaterialPrices] = useState({
     waxType: 'soy' as 'soy' | 'coconut',
     waxPricePerLb: 8.50,
     fragrancePricePerLb: 40.00,
@@ -75,6 +76,28 @@ export default function PricingWizardPage() {
     fillPercent: 80,
     fragranceLoad: 10,
   })
+
+  // Load persisted material prices from the DB-backed calculator config.
+  useEffect(() => {
+    fetch('/api/user/calculator-config')
+      .then(r => r.json())
+      .then(data => {
+        if (data?.config) {
+          const c = data.config
+          setMaterialPrices(prev => ({
+            ...prev,
+            waxPricePerLb: (c.waxPrice ?? prev.waxPricePerLb),
+            fragrancePricePerLb: (c.fragrancePrice ?? prev.fragrancePricePerLb),
+            cementPricePerLb: (c.cementPrice ?? prev.cementPricePerLb),
+            wickPrice: (c.wickPrice ?? prev.wickPrice),
+            paintPrice: (c.paintPrice ?? prev.paintPrice),
+            fillPercent: (c.defaultFillPercent ?? prev.fillPercent),
+            fragranceLoad: (c.defaultFragranceLoad ?? prev.fragranceLoad),
+          }))
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   // Vessels data
   const vessels: Vessel[] = [
