@@ -28,7 +28,7 @@ export default function BarcodeSystemPage() {
       name: "Lavender Bliss Candle",
       sku: "LAV-001",
       barcode: "1234567890123",
-      qrData: "https://www.limenlakay.com/products/lavender-bliss",
+      qrData: "https://www.candlepilots.com/products/lavender-bliss",
     },
   ]);
 
@@ -43,9 +43,9 @@ export default function BarcodeSystemPage() {
   const [labelTemplate, setLabelTemplate] = useState<LabelTemplate>({
     warningText: "Burn within sight. Keep away from flammable objects. Keep away from children and pets.",
     burningInstructions: "Trim wick to 1/4\" before lighting. Keep candle free of any foreign materials including matches and wick trimmings. Only burn the candle on a level, fire resistant surface. Do not burn candle for more than four hours at a time. Stop use when only 1/4\" of wax remains.",
-    phone: "561 593 0238",
-    email: "info@limenlakay.com",
-    website: "www.limenlakay.com"
+    phone: "+1-561-555-0238",
+    email: "hello@candlepilots.com",
+    website: "www.candlepilots.com"
   });
 
   const handleGenerateSKU = () => {
@@ -63,7 +63,7 @@ export default function BarcodeSystemPage() {
         name: newProduct.name,
         sku: newProduct.sku,
         barcode: generateEAN13(),
-        qrData: `https://www.limenlakay.com/products/${newProduct.sku.toLowerCase()}`,
+        qrData: `https://www.candlepilots.com/products/${newProduct.sku.toLowerCase()}`,
       };
       setProducts([...products, product]);
       setNewProduct({ name: "", sku: "" });
