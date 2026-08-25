@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getAppSession } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
       apiVersion: '2025-12-15.clover',
     });
 
-    const session = await getServerSession(authOptions);
+    const session = await getAppSession();
 
     if (!session || !session.user?.email) {
       return NextResponse.json(

@@ -1,13 +1,12 @@
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "./auth";
 import { canCreateResource, hasFeatureAccess } from "./subscription";
+import { getAppSession } from "./session";
 
 /**
  * Middleware to protect API routes and check authentication
  */
 export async function requireAuth() {
-  const session = await getServerSession(authOptions);
+  const session = await getAppSession();
 
   if (!session || !session.user) {
     return {
@@ -20,7 +19,7 @@ export async function requireAuth() {
   return {
     error: null,
     session,
-    userId: (session.user as any).id,
+    userId: session.user.id,
   };
 }
 

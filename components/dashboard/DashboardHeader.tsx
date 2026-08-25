@@ -1,9 +1,7 @@
 "use client";
 
-import { signOut } from "next-auth/react";
-import { Bell, Search, Settings, LogOut, User, Menu } from "lucide-react";
+import { Bell, Search, Settings, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -94,14 +92,6 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
-                  onClick={() => signOut({ callbackUrl: "/sign-in" })}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

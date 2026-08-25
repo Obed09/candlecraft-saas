@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
   Calculator,
   Settings,
-  LogOut,
 } from "lucide-react";
 
 interface DashboardNavProps {
@@ -77,13 +75,6 @@ export default function DashboardNav({ user }: DashboardNavProps) {
               <span className="text-sm text-zinc-700 dark:text-zinc-300 mr-4">
                 {user?.name || user?.email}
               </span>
-              <button
-                onClick={() => signOut({ callbackUrl: "/sign-in" })}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 dark:focus:ring-white"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </button>
             </div>
           </div>
         </div>
