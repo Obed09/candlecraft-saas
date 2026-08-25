@@ -225,16 +225,13 @@ export default function DashboardSidebar() {
 
         {/* Bottom Section */}
         <div className="flex-shrink-0 px-4 py-4 border-t border-purple-800/50">
-          <Link 
+          <Link
             href="/subscription-plans"
-            className="block bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4 hover:from-amber-500/20 hover:to-orange-500/20 hover:border-amber-500/40 transition-all cursor-pointer"
+            className="block bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-purple-200">Pro Plan</span>
-            </div>
-            <p className="text-xs text-purple-300">
-              Unlimited calculations & recipes
+            <span className="text-xs font-medium text-purple-200">Subscription</span>
+            <p className="text-xs text-purple-300 mt-1">
+              View plans and manage your subscription
             </p>
           </Link>
         </div>

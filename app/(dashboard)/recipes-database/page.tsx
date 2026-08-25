@@ -7,10 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Search, Plus, RotateCcw, Copy, Sparkles, Package, Tag, HelpCircle } from 'lucide-react'
 import { getBusinessSettings, type BusinessSettings } from '@/lib/businessSettings'
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { AITestResults } from '@/components/AITestResults'
-import { AIAnalysisResult } from '@/lib/aiScentAnalysis'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 
 interface Recipe {
   id: number | string
@@ -170,13 +167,7 @@ export default function RecipesDatabase() {
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null)
   const [showNewRecipeModal, setShowNewRecipeModal] = useState(false)
 
-  // AI Analysis state
-  const [showAIAnalysis, setShowAIAnalysis] = useState(false)
-  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [userTier, setUserTier] = useState<'free' | 'starter' | 'pro' | 'business'>('free')
   const { data: session } = useSession()
-  const router = useRouter()
 
   // Batch Production state
   const [showBatchModal, setShowBatchModal] = useState(false)
@@ -203,24 +194,6 @@ export default function RecipesDatabase() {
     return () => window.removeEventListener('businessSettingsUpdated', handleSettingsUpdate)
   }, [])
 
-  // Fetch user subscription tier
-  useEffect(() => {
-    const fetchUserTier = async () => {
-      try {
-        const response = await fetch('/api/user/subscription')
-        if (response.ok) {
-          const data = await response.json()
-          setUserTier(data.plan || 'free')
-        }
-      } catch (error) {
-        console.error('Error fetching user tier:', error)
-      }
-    }
-    if (session) {
-      fetchUserTier()
-    }
-  }, [session])
-
   // Load the user's persisted recipes from the DB-backed API on mount and merge
   // them with the 79 built-in seed templates (which remain read-only).
   useEffect(() => {
@@ -238,43 +211,6 @@ export default function RecipesDatabase() {
     }
     loadUserRecipes()
   }, [session])
-
-  // Analyze recipe with AI
-  const analyzeRecipeWithAI = async (recipe: Recipe) => {
-    setIsAnalyzing(true)
-    setShowAIAnalysis(true)
-    
-    try {
-      const ingredients = Object.entries(recipe.ingredients).map(([name, percentage]) => ({
-        name,
-        percentage
-      }))
-
-      const response = await fetch('/api/recipes/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          recipeName: recipe.name,
-          ingredients
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to analyze recipe')
-      }
-
-      const data = await response.json()
-      setAiAnalysis(data.analysis)
-      setUserTier(data.tier || 'free')
-    } catch (error) {
-      console.error('Error analyzing recipe:', error)
-      alert('Failed to analyze recipe. Please try again.')
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
 
   // Default vessels (same as calculator)
   const vessels: Vessel[] = [
@@ -873,28 +809,6 @@ export default function RecipesDatabase() {
                     </button>
                   </div>
 
-                  {/* AI Analysis Button */}
-                  <button
-                    onClick={() => analyzeRecipeWithAI(editingRecipe)}
-                    disabled={isAnalyzing}
-                    className="w-full mb-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
-                  >
-                    <Sparkles className="h-5 w-5" />
-                    {isAnalyzing ? 'Analyzing with AI...' : '✨ Analyze with AI'}
-                  </button>
-
-                  {/* AI Analysis Results */}
-                  {showAIAnalysis && aiAnalysis && (
-                    <div className="mb-6">
-                      <AITestResults
-                        analysis={aiAnalysis}
-                        tier={userTier}
-                        recipeName={editingRecipe.name}
-                        onUpgrade={() => router.push('/subscription-plans')}
-                      />
-                    </div>
-                  )}
-
                   {/* Actions */}
                   {selectedRecipe.isUserRecipe && (
                     <button
@@ -923,8 +837,6 @@ export default function RecipesDatabase() {
                         if (ok) {
                           setShowRecipeModal(false)
                           setEditingRecipe(null)
-                          setShowAIAnalysis(false)
-                          setAiAnalysis(null)
                         }
                       }}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-all"
@@ -1088,28 +1000,6 @@ export default function RecipesDatabase() {
                     </button>
                   </div>
 
-                  {/* AI Analysis Button */}
-                  <button
-                    onClick={() => analyzeRecipeWithAI(editingRecipe)}
-                    disabled={isAnalyzing}
-                    className="w-full mb-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
-                  >
-                    <Sparkles className="h-5 w-5" />
-                    {isAnalyzing ? 'Analyzing with AI...' : '✨ AI Scent Suggestions'}
-                  </button>
-
-                  {/* AI Analysis Results */}
-                  {showAIAnalysis && aiAnalysis && (
-                    <div className="mb-6">
-                      <AITestResults
-                        analysis={aiAnalysis}
-                        tier={userTier}
-                        recipeName={editingRecipe.name}
-                        onUpgrade={() => router.push('/subscription-plans')}
-                      />
-                    </div>
-                  )}
-
                   {/* Actions */}
                   <div className="flex gap-3">
                     <button
@@ -1127,8 +1017,6 @@ export default function RecipesDatabase() {
                     <button
                       onClick={() => {
                         saveNewRecipe()
-                        setShowAIAnalysis(false)
-                        setAiAnalysis(null)
                       }}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-all"
                     >
