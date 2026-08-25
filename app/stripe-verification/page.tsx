@@ -1,35 +1,22 @@
 "use client";
-
-// Stripe Business Verification Page - v1.0.2
-
+// Stripe Business Verification Page - v1.0.3 (honest billing)
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
+import { Check, CreditCard } from "lucide-react";
 
+/**
+ * Page used for Stripe business-account verification. It documents the
+ * payment model honestly — a single one-time setup / completion charge —
+ * and does NOT present fabricated monthly tiers or a fake 14-day trial.
+ * Actual pricing is configured by the product owner (see STRIPE_SETUP_PRICE_ID
+ * and STRIPE_SETUP_AMOUNT_CENTS), so no amount is invented here.
+ */
 export default function StripeVerificationPage() {
-  const plans = [
-    {
-      name: "Starter",
-      icon: Zap,
-      price: "$29",
-      period: "per month",
-      features: ["50 recipes", "100 orders per month", "Basic AI features", "Email support"],
-    },
-    {
-      name: "Pro",
-      icon: Crown,
-      price: "$79",
-      period: "per month",
-      features: ["Unlimited recipes", "Unlimited orders", "Full AI features", "Priority support"],
-      popular: true,
-    },
-    {
-      name: "Business",
-      icon: Building2,
-      price: "$149",
-      period: "per month",
-      features: ["Everything in Pro", "Team collaboration", "API access", "24/7 support"],
-    },
+  const billingModel = [
+    "One-time setup / completion fee per workspace",
+    "Charged securely through Stripe (Checkout Session, mode: payment)",
+    "No recurring charges from the platform at launch",
+    "Ongoing plans & pricing are configured by the product owner",
   ];
 
   return (
@@ -44,103 +31,48 @@ export default function StripeVerificationPage() {
             CandlePilots SaaS Platform
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            All-in-One Candle Business Management Platform with AI-Powered Features
+            All-in-One Candle Business Management Platform
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-500 mt-4">
             This page is for Stripe account verification purposes
           </p>
         </div>
 
-        {/* Company Info */}
+        {/* Payment Model / Billing */}
         <Card className="mb-12">
           <CardHeader>
-            <CardTitle className="text-2xl">About CandlePilots</CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Billing & Payment Model</CardTitle>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Approved, honest billing for launch
+                </p>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-gray-700 dark:text-gray-300">
-              <strong>Business Name:</strong> CandlePilots a Division of Limen Lakay LLC
-            </p>
-            <p className="text-gray-700 dark:text-gray-300">
-              <strong>Website:</strong> www.candlepilots.com
-            </p>
-            <p className="text-gray-700 dark:text-gray-300">
-              <strong>Product:</strong> Cloud-based SaaS platform for candle makers providing recipe management,
-              inventory tracking, cost analysis, AI-powered scent blending, production planning, and business analytics.
-            </p>
-            <p className="text-gray-700 dark:text-gray-300">
-              <strong>Payment Model:</strong> Monthly recurring subscription with 14-day free trial
-            </p>
-            <p className="text-gray-700 dark:text-gray-300">
-              <strong>Refund Policy:</strong> 30-day money-back guarantee, cancel anytime during trial period
-            </p>
-            <p className="text-gray-700 dark:text-gray-300">
-              <strong>Customer Support:</strong> Email support (support@candlepilots.com) with 24-48 hour response time
+          <CardContent>
+            <ul className="space-y-3">
+              {billingModel.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+              Configuration: the owner sets STRIPE_SETUP_PRICE_ID (a real Stripe
+              Price) or STRIPE_SETUP_AMOUNT_CENTS, plus STRIPE_SECRET_KEY and
+              STRIPE_WEBHOOK_SECRET, before any charge is enabled.
             </p>
           </CardContent>
         </Card>
 
-        {/* Pricing Plans */}
-        <h2 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-          Subscription Plans
-        </h2>
-        
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          {plans.map((plan, index) => {
-            const Icon = plan.icon;
-            return (
-              <Card
-                key={index}
-                className={`relative ${
-                  plan.popular
-                    ? "border-2 border-blue-500 shadow-xl"
-                    : "border border-gray-200 dark:border-gray-700"
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-blue-600 text-white px-4 py-1">
-                      MOST POPULAR
-                    </Badge>
-                  </div>
-                )}
-                
-                <CardHeader className="text-center">
-                  <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <CardTitle className="text-2xl">{plan.name} Plan</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold text-blue-600">{plan.price}</span>
-                    <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">{plan.period}</span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-3">
-                    {plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <button
-                    className={`w-full mt-6 py-3 px-6 rounded-lg font-bold transition-all ${
-                      plan.popular
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                    }`}
-                  >
-                    Start 14-Day Free Trial
-                  </button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Features */}
+        {/* Platform Features */}
         <Card className="mb-12">
           <CardHeader>
             <CardTitle className="text-2xl">Platform Features</CardTitle>
@@ -150,19 +82,15 @@ export default function StripeVerificationPage() {
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-gray-900 dark:text-white">Recipe Management</h3>
                 <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <li>• Store unlimited candle recipes</li>
                   <li>• Calculate costs automatically</li>
-                  <li>• AI-powered scent blending suggestions</li>
-                  <li>• Searchable recipe database</li>
+                  <li>• Searchable recipe library & testing log</li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-gray-900 dark:text-white">Business Tools</h3>
                 <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <li>• Inventory tracking</li>
-                  <li>• Order management</li>
-                  <li>• Customer database</li>
-                  <li>• Analytics & reporting</li>
+                  <li>• Vessel calculator</li>
+                  <li>• Inventory tracking & order management</li>
                 </ul>
               </div>
             </div>
@@ -176,23 +104,25 @@ export default function StripeVerificationPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
             <div>
-              <strong>Billing:</strong> All subscriptions are billed monthly. First charge occurs after the 14-day free trial period ends.
+              <strong>Billing:</strong> A one-time setup / completion fee per
+              workspace, processed through Stripe. No recurring platform charges
+              at launch.
             </div>
             <div>
-              <strong>Cancellation:</strong> Cancel anytime from your account settings. No charges after cancellation.
+              <strong>Payments:</strong> Handled by Stripe Checkout with signature
+              -verified webhook confirmation. No charges are taken until the owner
+              has configured a real Stripe price.
             </div>
             <div>
-              <strong>Refunds:</strong> 30-day money-back guarantee for all paid plans.
-            </div>
-            <div>
-              <strong>Contact:</strong> support@candlepilots.com for any questions or concerns.
+              <strong>Contact:</strong> support@candlepilots.com for any questions
+              or concerns.
             </div>
           </CardContent>
         </Card>
 
         {/* Footer Note */}
         <div className="text-center mt-12 text-gray-600 dark:text-gray-400 text-sm">
-          <p>This verification page demonstrates our Stripe integration for payment processing.</p>
+          <p>This verification page demonstrates our real Stripe integration for payment processing.</p>
           <p className="mt-2">All payments are processed securely through Stripe.</p>
         </div>
       </div>

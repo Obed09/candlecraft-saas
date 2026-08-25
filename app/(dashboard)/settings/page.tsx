@@ -285,10 +285,13 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="p-4">
                 <div className="text-center py-4">
-                  <p className="text-sm font-semibold text-purple-900 mb-1">Pro Plan</p>
-                  <p className="text-xs text-purple-700 mb-4">Unlimited calculations & recipes</p>
-                  <button className="w-full px-4 py-2.5 bg-white border-2 border-purple-300 rounded-lg text-sm font-semibold text-purple-700 hover:bg-purple-100 transition">
-                    Manage Plan
+                  <p className="text-sm font-semibold text-purple-900 mb-1">Plan &amp; Billing</p>
+                  <p className="text-xs text-purple-700 mb-4">Billing and plan are managed by the product owner</p>
+                  <button
+                    onClick={() => (window.location.href = "/subscription-plans")}
+                    className="w-full px-4 py-2.5 bg-white border-2 border-purple-300 rounded-lg text-sm font-semibold text-purple-700 hover:bg-purple-100 transition"
+                  >
+                    View Plan &amp; Billing
                   </button>
                 </div>
               </CardContent>

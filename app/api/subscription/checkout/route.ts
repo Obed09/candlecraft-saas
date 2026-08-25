@@ -5,15 +5,32 @@ import Stripe from 'stripe';
 
 /**
  * POST /api/subscription/checkout
- * Create a Stripe checkout session for upgrading/subscribing
- * Works for both new subscriptions and upgrades
+ *
+ * Creates a REAL Stripe Checkout Session. There is no fake checkout here:
+ * every session is created against the live Stripe API with a real customer.
+ *
+ * Default mode is `payment` — a single, one-time "setup / completion" charge
+ * appropriate for the CandlePilots launch. The price is NEVER invented in
+ * code. It is read from owner configuration:
+ *
+ *   - STRIPE_SETUP_PRICE_ID        -> a real Stripe Price object (recommended)
+ *   - STRIPE_SETUP_AMOUNT_CENTS    -> or a direct amount (with STRIPE_SETUP_CURRENCY)
+ *
+ * If neither is set, the endpoint honestly returns 503 (not configured)
+ * instead of fabricating a price.
+ *
+ * `mode: "subscription"` remains reachable so the acquiring owner can wire up
+ * their own recurring plan later (real Stripe Prices only — no placeholder IDs).
+ * The subscription path is NOT exposed by the default UI; it is plumbing for
+ * the future owner.
  */
 export async function POST(request: NextRequest) {
   try {
-    // Check if Stripe is configured
-    const isStripeConfigured = process.env.STRIPE_SECRET_KEY && 
-                               !process.env.STRIPE_SECRET_KEY.includes('your_stripe') &&
-                               process.env.STRIPE_SECRET_KEY.startsWith('sk_');
+    // Check if Stripe is configured (real secret key present)
+    const isStripeConfigured =
+      process.env.STRIPE_SECRET_KEY &&
+      !process.env.STRIPE_SECRET_KEY.includes('your_stripe') &&
+      process.env.STRIPE_SECRET_KEY.startsWith('sk_');
 
     if (!isStripeConfigured) {
       return NextResponse.json(
@@ -27,7 +44,6 @@ export async function POST(request: NextRequest) {
     });
 
     const session = await getAppSession();
-
     if (!session || !session.user?.email) {
       return NextResponse.json(
         { error: 'Unauthorized - Please sign in first' },
@@ -36,25 +52,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { plan } = body;
+    const { mode = 'payment', plan } = body;
 
-    // Validate plan
-    if (!['starter', 'pro', 'business'].includes(plan)) {
+    if (mode !== 'payment' && mode !== 'subscription') {
       return NextResponse.json(
-        { error: 'Invalid plan selected. Please choose starter, pro, or business.' },
+        { error: 'Invalid mode. Supported modes: payment, subscription.' },
         { status: 400 }
-      );
-    }
-
-    // Check if user is on a locked free tier (demo accounts)
-    const userBusiness = await prisma.business.findFirst({
-      where: { user: { email: session.user.email } },
-      include: { subscription: true },
-    });
-    if (userBusiness?.subscription?.isLockedFree) {
-      return NextResponse.json(
-        { error: 'Demo accounts cannot be upgraded. Please contact support.' },
-        { status: 403 }
       );
     }
 
@@ -64,10 +67,10 @@ export async function POST(request: NextRequest) {
       include: {
         business: {
           include: {
-            subscription: true
-          }
-        }
-      }
+            subscription: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure user has a business
+    // Ensure user has a business (and a subscription row)
     let business = user.business;
     if (!business) {
       business = await prisma.business.create({
@@ -87,21 +90,29 @@ export async function POST(request: NextRequest) {
           subscription: {
             create: {
               plan: 'free',
-              status: 'active'
-            }
-          }
+              status: 'active',
+            },
+          },
         },
         include: {
-          subscription: true
-        }
+          subscription: true,
+        },
       });
     }
 
     const subscription = business.subscription;
 
-    // Create or get Stripe customer
+    // Demo / locked-free accounts cannot take a real payment
+    if (subscription?.isLockedFree) {
+      return NextResponse.json(
+        { error: 'Demo accounts cannot complete payment. Please contact support.' },
+        { status: 403 }
+      );
+    }
+
+    // Create or reuse Stripe customer
     let customerId = subscription?.stripeCustomerId;
-    
+
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -113,7 +124,6 @@ export async function POST(request: NextRequest) {
       });
       customerId = customer.id;
 
-      // Update subscription with customer ID
       await prisma.subscription.upsert({
         where: { businessId: business.id },
         update: { stripeCustomerId: customerId },
@@ -121,25 +131,93 @@ export async function POST(request: NextRequest) {
           businessId: business.id,
           plan: 'free',
           status: 'active',
-          stripeCustomerId: customerId
-        }
+          stripeCustomerId: customerId,
+        },
       });
     }
 
-    // Price IDs based on plan
-    const priceIds: Record<string, string> = {
-      starter: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
-      pro: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || 'price_pro_monthly',
-      business: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || 'price_business_monthly',
+    // ------------------------------------------------------------------
+    // ONE-TIME setup / completion fee (the default for launch)
+    // ------------------------------------------------------------------
+    if (mode === 'payment') {
+      const priceId = process.env.STRIPE_SETUP_PRICE_ID;
+      const amountCents = process.env.STRIPE_SETUP_AMOUNT_CENTS;
+      const currency = process.env.STRIPE_SETUP_CURRENCY;
+
+      // No price invented here — if nothing is configured, say so honestly.
+      if (!priceId && !amountCents) {
+        return NextResponse.json(
+          {
+            error:
+              'Payment is not configured yet. The owner must set STRIPE_SETUP_PRICE_ID (recommended) or STRIPE_SETUP_AMOUNT_CENTS before this can be enabled.',
+            code: 'PAYMENT_NOT_CONFIGURED',
+          },
+          { status: 503 }
+        );
+      }
+
+      const checkoutSession = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        line_items: priceId
+          ? [{ price: priceId, quantity: 1 }]
+          : [
+              {
+                price_data: {
+                  currency: currency || 'usd',
+                  product_data: { name: 'CandlePilots setup / completion fee' },
+                  unit_amount: Number(amountCents),
+                },
+                quantity: 1,
+              },
+            ],
+        mode: 'payment',
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?paid=true`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription-plans?canceled=true`,
+        metadata: {
+          businessId: business.id,
+          userId: user.id,
+          type: 'setup_fee',
+          priceId: priceId || '',
+        },
+      });
+
+      return NextResponse.json({
+        url: checkoutSession.url,
+        mode: 'payment',
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // SUBSCRIPTION mode — reachable plumbing for the future owner's plan
+    // ------------------------------------------------------------------
+    if (!['starter', 'pro', 'business'].includes(plan)) {
+      return NextResponse.json(
+        { error: 'Invalid plan selected. Please choose starter, pro, or business.' },
+        { status: 400 }
+      );
+    }
+
+    const priceIds: Record<string, string | undefined> = {
+      starter: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID,
+      pro: process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
+      business: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID,
     };
 
-    // Check if upgrading existing subscription
-    const isUpgrade = subscription?.stripeSubscriptionId && subscription.status === 'active';
+    const priceId = priceIds[plan as keyof typeof priceIds];
+    if (!priceId) {
+      return NextResponse.json(
+        {
+          error: `Subscriptions are not configured yet. Set the real STRIPE_<PLAN>_MONTHLY_PRICE_ID for "${plan}" before enabling.`,
+          code: 'PAYMENT_NOT_CONFIGURED',
+        },
+        { status: 503 }
+      );
+    }
 
-    let checkoutSession;
-
-    if (isUpgrade) {
-      // Upgrading - go to billing portal
+    // If the user already has an active Stripe subscription, route them to the
+    // billing portal (real Stripe) instead of creating a duplicate.
+    if (subscription?.stripeSubscriptionId && subscription.status === 'active') {
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: customerId,
         return_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?upgraded=true`,
@@ -147,52 +225,53 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         url: portalSession.url,
-        isUpgrade: true
-      });
-    } else {
-      // New subscription - create checkout session
-      checkoutSession = await stripe.checkout.sessions.create({
-        customer: customerId,
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price: priceIds[plan],
-            quantity: 1,
-          },
-        ],
         mode: 'subscription',
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription-plans?canceled=true`,
+        isUpgrade: true,
+      });
+    }
+
+    const checkoutSession = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/analytics?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription-plans?canceled=true`,
+      metadata: {
+        businessId: business.id,
+        userId: user.id,
+        plan,
+      },
+      subscription_data: {
+        trial_period_days: process.env.STRIPE_SUBSCRIPTION_TRIAL_DAYS
+          ? Number(process.env.STRIPE_SUBSCRIPTION_TRIAL_DAYS)
+          : 0,
         metadata: {
           businessId: business.id,
           userId: user.id,
           plan,
         },
-        subscription_data: {
-          trial_period_days: 14,
-          metadata: {
-            businessId: business.id,
-            userId: user.id,
-            plan,
-          },
-        },
-      });
+      },
+    });
 
-      // Update subscription to pending
-      await prisma.subscription.update({
-        where: { businessId: business.id },
-        data: {
-          plan: plan,
-          status: 'incomplete',
-        },
-      });
+    // Mark the subscription row as pending so the webhook can finalize it.
+    await prisma.subscription.update({
+      where: { businessId: business.id },
+      data: {
+        plan,
+        status: 'incomplete',
+      },
+    });
 
-      return NextResponse.json({
-        url: checkoutSession.url,
-        isUpgrade: false
-      });
-    }
-
+    return NextResponse.json({
+      url: checkoutSession.url,
+      mode: 'subscription',
+    });
   } catch (error: any) {
     console.error('Checkout error:', error);
     return NextResponse.json(

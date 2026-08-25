@@ -75,6 +75,15 @@ export default function SubscriptionStatus() {
     return "bg-green-500";
   };
 
+  const planLabel =
+    data.plan.charAt(0).toUpperCase() + data.plan.slice(1);
+
+  // A status of "active" on the free plan is the normal default state and does
+  // NOT imply a paid tier. Show an honest label unless the owner has configured
+  // an actual paid subscription for this account.
+  const isPaid =
+    data.plan !== "free" && data.status !== "incomplete" && data.status !== "canceled";
+
   return (
     <Card className="p-6">
       <div className="space-y-6">
@@ -82,14 +91,14 @@ export default function SubscriptionStatus() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Subscription Plan
+              Plan
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Manage your subscription and usage
+              Your current access level
             </p>
           </div>
           <Badge className={planColors[data.plan]}>
-            {data.plan.charAt(0).toUpperCase() + data.plan.slice(1)}
+            {isPaid ? planLabel : "Free"}
           </Badge>
         </div>
 
@@ -136,31 +145,30 @@ export default function SubscriptionStatus() {
           })}
         </div>
 
-        {/* Upgrade CTA */}
-        {data.plan === "free" && (
+        {/* Billing CTA */}
+        {!isPaid && (
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg">
               <p className="text-sm text-gray-900 dark:text-white font-medium mb-2">
-                Unlock More Features
+                Complete Setup
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                Upgrade to access unlimited recipes, orders, AI features, and
-                more!
+                One-time setup / billing is managed by the product owner.
               </p>
               <Link
                 href="/subscription-plans"
                 className="inline-block px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-md hover:from-blue-700 hover:to-purple-700 transition-colors"
               >
-                View Plans
+                View billing
               </Link>
             </div>
           </div>
         )}
 
-        {/* Plan Features */}
+        {/* Feature access */}
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Your Plan Includes
+            Included
           </h4>
           <ul className="space-y-2 text-sm">
             <li
@@ -188,16 +196,6 @@ export default function SubscriptionStatus() {
               Advanced Analytics
             </li>
           </ul>
-        </div>
-
-        {/* Manage Subscription */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Link
-            href="/settings"
-            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            Manage Subscription →
-          </Link>
         </div>
       </div>
     </Card>
