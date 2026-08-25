@@ -17,7 +17,6 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
-  DollarSignIcon,
   Truck,
   CalendarDays,
   TrendingUp,
@@ -29,7 +28,8 @@ import {
   Zap,
   ClipboardCheck,
   ShoppingBag,
-  Share2
+  Share2,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,57 +45,49 @@ interface NavigationItem {
   tooltip: string;
 }
 
+/**
+ * Nav is deliberately honest: what actually works is listed first under
+ * "Core Tools", and everything that is still a plan lives under "Coming Soon"
+ * (the roadmap). No demo feature is presented as a finished, working one.
+ */
 const navigationSections: NavigationSection[] = [
   {
-    name: "Overview",
+    name: "Core Tools",
     items: [
-      { name: "Dashboard", href: "/analytics", icon: LayoutDashboard, tooltip: "View comprehensive business analytics and performance metrics" },
-    ]
-  },
-  {
-    name: "Calculators",
-    items: [
-      { name: "Vessel Calculator", href: "/calculator", icon: Calculator, tooltip: "Calculate wax, fragrance, and material requirements for different vessel sizes" },
-      { name: "Pricing Wizard", href: "/pricing-wizard", icon: DollarSign, tooltip: "Determine optimal pricing strategy based on costs and profit margins" },
-      { name: "Cost Analysis", href: "/cost-analysis", icon: TrendingUp, tooltip: "Analyze profitability, break-even points, and ROI for your candle business" },
-    ]
-  },
-  {
-    name: "Management",
-    items: [
-      { name: "Inventory", href: "/inventory", icon: Package, tooltip: "Track and manage raw materials, supplies, and finished products" },
-      { name: "Suppliers", href: "/supplier-manager", icon: Truck, tooltip: "Manage supplier contacts, pricing, and purchase orders" },
-      { name: "Production", href: "/production", icon: CalendarDays, tooltip: "Schedule and track candle production batches and workflows" },
-      { name: "Automation", href: "/automation", icon: Zap, tooltip: "Set up automated production rules and inventory reordering" },
-      { name: "Team", href: "/team", icon: Users, tooltip: "Manage team members, roles, permissions, and activity tracking" },
-      { name: "Quality Control", href: "/quality-control", icon: ClipboardCheck, tooltip: "Perform batch testing, quality checks, and compliance verification" },
-    ]
-  },
-  {
-    name: "Recipes & Development",
-    items: [
-      { name: "Recipe Database", href: "/recipes-database", icon: Flame, tooltip: "Store and manage candle recipes with ingredients and instructions" },
-      { name: "Barcodes & Labels", href: "/barcodes", icon: ScanBarcode, tooltip: "Generate barcodes, QR codes, and product labels for your candles" },
+      { name: "Vessel Calculator", href: "/calculator", icon: Calculator, tooltip: "Calculate wax, fragrance, and material requirements for different vessels — saved to your account" },
+      { name: "Recipe Library", href: "/recipes-database", icon: Flame, tooltip: "Store and manage candle recipes — save your own and keep them in your account" },
       { name: "Testing Log", href: "/testing-log", icon: FlaskConical, tooltip: "Document burn tests, fragrance trials, and product experiments" },
-      { name: "AI Scent Blender", href: "/ai-blender", icon: Sparkles, tooltip: "Create custom fragrance blends with AI-powered scent recommendations" },
-      { name: "AI Insights", href: "/ai-insights", icon: Sparkles, tooltip: "Get AI-driven recommendations for inventory, pricing, and production" },
+      { name: "Cost Analysis", href: "/cost-analysis", icon: DollarSign, tooltip: "Analyze profitability, break-even, and margin for your candles" },
+      { name: "Pricing Wizard", href: "/pricing-wizard", icon: TrendingUp, tooltip: "Determine pricing based on your costs and target margin" },
+      { name: "Reports", href: "/reports", icon: BarChart3, tooltip: "Sales, revenue, and performance reports" },
     ]
   },
   {
-    name: "Business",
+    name: "Account",
     items: [
-      { name: "Customers", href: "/customers", icon: Users, tooltip: "Manage customer database, contacts, and purchase history" },
-      { name: "Customer Portal", href: "/customer-portal", icon: Users, tooltip: "Customer-facing portal for order tracking and invoice management" },
-      { name: "Orders", href: "/orders", icon: FileText, tooltip: "Process and track customer orders from placement to delivery" },
-      { name: "Invoices", href: "/invoices", icon: Receipt, tooltip: "Create, send, and manage invoices with payment tracking" },
-      { name: "E-commerce", href: "/ecommerce", icon: ShoppingBag, tooltip: "Integrate with Shopify, Etsy, and other online sales platforms" },
-      { name: "Analytics", href: "/reports", icon: BarChart3, tooltip: "Generate detailed reports on sales, revenue, and business performance" },
+      { name: "Dashboard", href: "/analytics", icon: LayoutDashboard, tooltip: "CandlePilots overview and quick links" },
+      { name: "Settings", href: "/settings", icon: Settings, tooltip: "Configure account settings and preferences" },
+      { name: "Profile", href: "/profile", icon: User, tooltip: "Your profile information" },
     ]
   },
   {
-    name: "Marketing",
+    name: "Coming Soon",
     items: [
-      { name: "Social Media", href: "/social-media", icon: Share2, tooltip: "AI-powered social media automation - posts that sound exactly like you" },
+      { name: "AI Scent Blender", href: "/ai-blender", icon: Sparkles, tooltip: "On the roadmap — AI-powered blend guidance" },
+      { name: "AI Insights", href: "/ai-insights", icon: Sparkles, tooltip: "On the roadmap — AI recommendations" },
+      { name: "Inventory", href: "/inventory", icon: Package, tooltip: "On the roadmap — raw material tracking" },
+      { name: "Suppliers", href: "/supplier-manager", icon: Truck, tooltip: "On the roadmap — supplier management" },
+      { name: "Production", href: "/production", icon: CalendarDays, tooltip: "On the roadmap — production batches" },
+      { name: "Automation", href: "/automation", icon: Zap, tooltip: "On the roadmap — automated rules" },
+      { name: "Quality Control", href: "/quality-control", icon: ClipboardCheck, tooltip: "On the roadmap — QC workflows" },
+      { name: "Barcodes & Labels", href: "/barcodes", icon: ScanBarcode, tooltip: "On the roadmap — label generation" },
+      { name: "Customers", href: "/customers", icon: Users, tooltip: "On the roadmap — customer database" },
+      { name: "Customer Portal", href: "/customer-portal", icon: Users, tooltip: "On the roadmap — customer-facing portal" },
+      { name: "Orders", href: "/orders", icon: FileText, tooltip: "On the roadmap — order processing" },
+      { name: "Invoices", href: "/invoices", icon: Receipt, tooltip: "On the roadmap — invoicing" },
+      { name: "E-commerce", href: "/ecommerce", icon: ShoppingBag, tooltip: "On the roadmap — Shopify/Etsy sync" },
+      { name: "Team", href: "/team", icon: Users, tooltip: "On the roadmap — multi-user team support" },
+      { name: "Social Media", href: "/social-media", icon: Share2, tooltip: "On the roadmap — social media tools" },
     ]
   },
 ];
@@ -103,11 +95,9 @@ const navigationSections: NavigationSection[] = [
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    "Overview": true,
-    "Calculators": true,
-    "Management": true,
-    "Recipes & Development": true,
-    "Business": true,
+    "Core Tools": true,
+    "Account": true,
+    "Coming Soon": false,
   });
 
   const toggleSection = (sectionName: string) => {
@@ -147,7 +137,12 @@ export default function DashboardSidebar() {
               {/* Section Header */}
               <button
                 onClick={() => toggleSection(section.name)}
-                className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-purple-300 uppercase tracking-wider hover:text-white transition-colors"
+                className={cn(
+                  "flex items-center justify-between w-full px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors",
+                  section.name === "Coming Soon"
+                    ? "text-amber-400 hover:text-amber-200"
+                    : "text-purple-300 hover:text-white"
+                )}
               >
                 <span>{section.name}</span>
                 {expandedSections[section.name] ? (
@@ -196,36 +191,6 @@ export default function DashboardSidebar() {
               )}
             </div>
           ))}
-
-          {/* Settings */}
-          <div className="pt-4 border-t border-purple-800/30">
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <Link
-                  href="/settings"
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                    pathname === "/settings"
-                      ? "bg-white/10 text-white shadow-lg backdrop-blur-sm border border-white/20"
-                      : "text-purple-200 hover:bg-white/5 hover:text-white"
-                  )}
-                >
-                  <Settings className={cn("w-4 h-4", pathname === "/settings" ? "text-amber-400" : "")} />
-                  <span className="text-xs">Settings</span>
-                </Link>
-              </Tooltip.Trigger>
-              <Tooltip.Portal>
-                <Tooltip.Content 
-                  side="right" 
-                  className="bg-white text-gray-900 px-3 py-2 rounded-lg shadow-lg text-sm max-w-xs z-[9999]"
-                  sideOffset={5}
-                >
-                  Configure account settings, payment gateways, and automation preferences
-                  <Tooltip.Arrow className="fill-white" />
-                </Tooltip.Content>
-              </Tooltip.Portal>
-            </Tooltip.Root>
-          </div>
 
           {/* Guide */}
           <div className="pt-2">

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Package,
   Calculator,
+  Flame,
+  FlaskConical,
   Settings,
 } from "lucide-react";
 
@@ -16,21 +16,22 @@ interface DashboardNavProps {
 export default function DashboardNav({ user }: DashboardNavProps) {
   const pathname = usePathname();
 
+  // Core (working) features only — this mirrors the sidebar's truthful nav.
   const navItems = [
     {
-      name: "Analytics",
-      href: "/analytics",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Inventory",
-      href: "/inventory",
-      icon: Package,
-    },
-    {
-      name: "Calculator",
+      name: "Vessel Calculator",
       href: "/calculator",
       icon: Calculator,
+    },
+    {
+      name: "Recipe Library",
+      href: "/recipes-database",
+      icon: Flame,
+    },
+    {
+      name: "Testing Log",
+      href: "/testing-log",
+      icon: FlaskConical,
     },
     {
       name: "Settings",
