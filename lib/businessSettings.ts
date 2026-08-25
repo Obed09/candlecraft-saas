@@ -40,14 +40,14 @@ export interface BusinessSettings {
 }
 
 const DEFAULT_SETTINGS: BusinessSettings = {
-  businessName: 'Limen Lakay',
+  businessName: 'CandlePilots',
   firstName: '',
   lastName: '',
-  email: 'hello@limenlakay.com',
+  email: 'hello@candlepilots.com',
   phone: '+1-561-555-0238',
-  website: 'www.limenlakay.com',
+  website: 'www.candlepilots.com',
   address: '',
-  city: 'Palm Beach',
+  city: '',
   state: 'FL',
   zipCode: '',
   logoUrl: null,

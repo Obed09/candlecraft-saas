@@ -17,11 +17,7 @@ export default function DashboardFooter() {
                 <span className="text-purple-600 font-semibold">🕯️ CandlePilots</span>
                 <span className="hidden md:inline">•</span>
               </div>
-              <span className="text-xs md:text-sm">
-                A division of <span className="font-semibold text-gray-700 dark:text-gray-300">Limen Lakay</span>
-              </span>
-              <span className="hidden md:inline">•</span>
-              <span className="text-xs md:text-sm">© {new Date().getFullYear()} All rights reserved.</span>
+              <span className="text-xs md:text-sm">© {new Date().getFullYear()} CandlePilots. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-6">
               <Link 

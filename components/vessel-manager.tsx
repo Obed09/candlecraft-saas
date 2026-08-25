@@ -244,7 +244,7 @@ export default function VesselManager() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `limen-lakay-vessels-${new Date().getTime()}.json`;
+    a.download = `candlepilots-vessels-${new Date().getTime()}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
