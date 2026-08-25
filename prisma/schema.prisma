@@ -80,6 +80,8 @@ model Business {
   orders            Order[]
   expenses          Expense[]
   customVessels     CustomVessel[]
+  testLogs          TestLog[]
+  config            BusinessConfig?
   
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -190,16 +192,19 @@ model Recipe {
 }
 
 model RecipeIngredient {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   recipeId        String
-  recipe          Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  productId       String
-  product         Product  @relation(fields: [productId], references: [id])
-  
+  recipe          Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  // Link to a Product when one exists; optional so a blend/percentage can be
+  // recorded even before an inventory Product is created.
+  productId       String?
+  product         Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  name            String?   // denormalized ingredient name (used when no product linked)
   quantity        Float
-  unit            String   @default("oz")
-  percentage      Float?   // Percentage of total batch
+  unit            String    @default("oz")
+  percentage      Float?    // Percentage of total batch
   
   notes           String?
   
@@ -304,4 +309,61 @@ model Expense {
   
   @@index([businessId])
   @@index([date])
+}
+
+// Testing / Quality Control Log
+model TestLog {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?  @db.Text
+
+  // Optional reference to a candle Product; candleName is kept denormalized so a
+  // test still reads clearly even if the linked Product is later removed.
+  candleId    String?
+  candleName  String?
+
+  wickType    String?
+  coldThrow   Int?     // 1-10 fragrance throw rating (cold)
+  hotThrow    Int?     // 1-10 fragrance throw rating (hot)
+  burnTime    Int?     // minutes
+
+  tunnel      Boolean  @default(false)
+  soot        Boolean  @default(false)
+  mushroom    Boolean  @default(false)
+
+  notes       String?  @db.Text
+  result      String?  // e.g. passed / failed / in-progress
+
+  testDate    DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+// Per-Business calculator / costing configuration (vessel calculator inputs)
+model BusinessConfig {
+  id                    String   @id @default(cuid())
+  businessId            String   @unique
+  business              Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Material prices (per unit, currency set by the field below)
+  waxPrice              Float?
+  fragrancePrice        Float?
+  cementPrice           Float?
+  wickPrice             Float?
+  paintPrice            Float?
+
+  // Vessel calculator defaults
+  defaultFillPercent    Float?   @default(90)
+  defaultFragranceLoad  Float?   @default(6)
+
+  currency              String?  @default("USD")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
