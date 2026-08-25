@@ -123,6 +123,40 @@ export default function CostAnalysisPage() {
   const [laborHoursPerUnit, setLaborHoursPerUnit] = useState(0.5)
   const [monthlySalesGoal, setMonthlySalesGoal] = useState(200)
 
+  // Ground the cost analysis in real persisted data: material prices come from
+  // the DB-backed calculator config, and monthly overhead is derived from the
+  // user's persisted expenses. These replace placeholder figures so the cost
+  // breakdown reflects genuine numbers (the user can still adjust them).
+  useEffect(() => {
+    fetch('/api/user/calculator-config')
+      .then(r => r.json())
+      .then(data => {
+        if (data?.config) {
+          const c = data.config
+          setMaterialPrices(prev => ({
+            ...prev,
+            waxPricePerLb: (c.waxPrice ?? prev.waxPricePerLb),
+            fragrancePricePerLb: (c.fragrancePrice ?? prev.fragrancePricePerLb),
+            cementPricePerLb: (c.cementPrice ?? prev.cementPricePerLb),
+            wickPrice: (c.wickPrice ?? prev.wickPrice),
+            paintPrice: (c.paintPrice ?? prev.paintPrice),
+          }))
+        }
+      })
+      .catch(console.error)
+
+    fetch('/api/expenses')
+      .then(r => r.json())
+      .then(data => {
+        const expenses = data.expenses || []
+        if (expenses.length > 0) {
+          const total = expenses.reduce((sum: number, e: { amount: number }) => sum + (e.amount || 0), 0)
+          setMonthlyOverhead(total)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
   const [advancedCosts, setAdvancedCosts] = useState({
     rent: 800,
     utilities: 150,

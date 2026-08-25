@@ -13,7 +13,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 interface Recipe {
-  id: number
+  id: number | string
   name: string
   category?: string
   profile?: string
@@ -23,6 +23,19 @@ interface Recipe {
   ingredients: { [key: string]: number }
   isUserRecipe?: boolean
 }
+
+// Map a persisted /api/recipes record into the local display shape. Seed
+// recipes (the 79 built-in templates) stay static; anything returned by the API
+// is a genuine, tenant-scoped user recipe.
+const mapApiRecipe = (r: any): Recipe => ({
+  id: r.id as string,
+  name: r.name,
+  description: r.description,
+  ingredients: Object.fromEntries(
+    (r.ingredients || []).map((ing: any) => [ing.name || 'Ingredient', ing.percentage ?? 0])
+  ),
+  isUserRecipe: true,
+})
 
 interface Vessel {
   id: number
@@ -208,6 +221,24 @@ export default function RecipesDatabase() {
     }
   }, [session])
 
+  // Load the user's persisted recipes from the DB-backed API on mount and merge
+  // them with the 79 built-in seed templates (which remain read-only).
+  useEffect(() => {
+    if (!session) return
+    const loadUserRecipes = async () => {
+      try {
+        const res = await fetch('/api/recipes')
+        if (!res.ok) return
+        const data = await res.json()
+        const userRecipes: Recipe[] = (data.recipes || []).map(mapApiRecipe)
+        setRecipes(prev => [...userRecipes, ...prev.filter(r => !r.isUserRecipe)])
+      } catch (error) {
+        console.error('Error loading user recipes:', error)
+      }
+    }
+    loadUserRecipes()
+  }, [session])
+
   // Analyze recipe with AI
   const analyzeRecipeWithAI = async (recipe: Recipe) => {
     setIsAnalyzing(true)
@@ -359,11 +390,83 @@ export default function RecipesDatabase() {
   }
 
   // Save new recipe
-  const saveNewRecipe = () => {
-    if (editingRecipe) {
-      setRecipes(prev => [editingRecipe, ...prev])
+  const saveNewRecipe = async () => {
+    if (!editingRecipe) return
+    const ok = await persistRecipe(editingRecipe)
+    if (ok) {
       setShowNewRecipeModal(false)
       setEditingRecipe(null)
+    }
+  }
+
+  // Persist a recipe to the DB-backed API. Existing user recipes (which carry a
+  // server cuid as their string id) are PATCHed; anything else — a brand-new
+  // recipe or a seed template being customized — creates a genuine user recipe
+  // via POST. Seed templates themselves are never mutated.
+  const persistRecipe = async (recipe: Recipe): Promise<boolean> => {
+    const ingredients = Object.entries(recipe.ingredients).map(([name, percentage]) => ({
+      name,
+      percentage,
+      quantity: percentage,
+      unit: 'oz',
+    }))
+    try {
+      if (recipe.isUserRecipe && typeof recipe.id === 'string') {
+        const res = await fetch(`/api/recipes/${recipe.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: recipe.name, ingredients }),
+        })
+        if (!res.ok) {
+          alert('Failed to save recipe')
+          return false
+        }
+        const data = await res.json()
+        const updated = mapApiRecipe(data.recipe)
+        setRecipes(prev => prev.map(r => r.id === recipe.id ? updated : r))
+        return true
+      }
+      const res = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: recipe.name,
+          batchSize: 100,
+          unit: 'oz',
+          ingredients,
+        }),
+      })
+      if (!res.ok) {
+        alert('Failed to create recipe')
+        return false
+      }
+      const data = await res.json()
+      const saved = mapApiRecipe(data.recipe)
+      setRecipes(prev => [saved, ...prev.filter(r => r.id !== saved.id)])
+      return true
+    } catch (error) {
+      console.error('Error persisting recipe:', error)
+      alert('Failed to save recipe')
+      return false
+    }
+  }
+
+  // Delete a user-created recipe (seed templates are read-only).
+  const deleteUserRecipe = async (recipe: Recipe) => {
+    if (typeof recipe.id !== 'string') return
+    if (!confirm(`Delete recipe "${recipe.name}"?`)) return
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setRecipes(prev => prev.filter(r => r.id !== recipe.id))
+        setShowRecipeModal(false)
+        setEditingRecipe(null)
+      } else {
+        alert('Failed to delete recipe')
+      }
+    } catch (error) {
+      console.error('Error deleting recipe:', error)
+      alert('Failed to delete recipe')
     }
   }
 
@@ -793,6 +896,14 @@ export default function RecipesDatabase() {
                   )}
 
                   {/* Actions */}
+                  {selectedRecipe.isUserRecipe && (
+                    <button
+                      onClick={() => deleteUserRecipe(editingRecipe)}
+                      className="w-full mb-3 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition-all"
+                    >
+                      🗑️ Delete Recipe
+                    </button>
+                  )}
                   <div className="flex gap-3">
                     <button
                       onClick={() => copyRecipe(editingRecipe)}
@@ -807,12 +918,14 @@ export default function RecipesDatabase() {
                       💾 Export
                     </button>
                     <button
-                      onClick={() => {
-                        setRecipes(prev => prev.map(r => r.id === editingRecipe.id ? editingRecipe : r))
-                        setShowRecipeModal(false)
-                        setEditingRecipe(null)
-                        setShowAIAnalysis(false)
-                        setAiAnalysis(null)
+                      onClick={async () => {
+                        const ok = await persistRecipe(editingRecipe)
+                        if (ok) {
+                          setShowRecipeModal(false)
+                          setEditingRecipe(null)
+                          setShowAIAnalysis(false)
+                          setAiAnalysis(null)
+                        }
                       }}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-all"
                     >
