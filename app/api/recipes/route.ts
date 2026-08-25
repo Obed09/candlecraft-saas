@@ -105,7 +105,8 @@ export async function POST(request: Request) {
         businessId: business.id,
         ingredients: {
           create: ingredients?.map((ing: any) => ({
-            productId: ing.productId,
+            productId: ing.productId || null,
+            name: ing.name,
             quantity: parseFloat(ing.quantity),
             unit: ing.unit || "oz",
             percentage: ing.percentage ? parseFloat(ing.percentage) : null,
