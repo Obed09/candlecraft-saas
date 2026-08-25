@@ -3,741 +3,205 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown, Building2, GraduationCap, Lock } from "lucide-react";
+import { Check, CreditCard, Lock } from "lucide-react";
 import { useSession } from "next-auth/react";
 
+/**
+ * Billing page for CandlePilots launch.
+ *
+ * There is deliberately NO fake multi-tier subscription UI here. The product is
+ * sold through the cto.new Marketplace; the acquiring owner will configure their
+ * own pricing/plan after acquisition.
+ *
+ * For launch we present exactly ONE honest payment path: a one-time
+ * "setup / completion" fee charged through a REAL Stripe Checkout Session
+ * (mode: "payment"). The amount is read from owner configuration:
+ *
+ *   - NEXT_PUBLIC_SETUP_FEE_AMOUNT  (display-only label, e.g. "$500")
+ *   - STRIPE_SETUP_PRICE_ID         (real Stripe Price) — set server-side
+ *   - STRIPE_SETUP_AMOUNT_CENTS     (or a direct amount) — set server-side
+ *
+ * If Stripe/price is not configured, the page shows an honest "payments not
+ * configured" state (the API returns 503) rather than faking a success.
+ */
 export default function SubscriptionPlansPage() {
   const { status } = useSession();
-  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [isLockedFree, setIsLockedFree] = useState(false);
+  const [notice, setNotice] = useState<{
+    kind: "error" | "info";
+    text: string;
+  } | null>(null);
+
+  // Display-only placeholder for the setup fee label. Clearly optional; the
+  // real charge is controlled server-side by STRIPE_SETUP_PRICE_ID /
+  // STRIPE_SETUP_AMOUNT_CENTS which the owner configures.
+  const configuredFeeLabel = process.env.NEXT_PUBLIC_SETUP_FEE_AMOUNT;
 
   useEffect(() => {
-    // Check if this user is a locked free (demo) account
-    fetch('/api/subscription')
-      .then(res => res.json())
-      .then(data => {
+    // Check if this user is a locked-free (demo) account
+    fetch("/api/subscription")
+      .then((res) => res.json())
+      .then((data) => {
         if (data?.subscription?.isLockedFree) setIsLockedFree(true);
       })
       .catch(() => {});
   }, []);
 
-  const handleSelectPlan = async (planId: string) => {
-    if (status === 'loading') return;
+  const handlePaySetupFee = async () => {
+    if (status === "loading" || isLoading) return;
 
-    // Block locked-free (demo) accounts from upgrading
     if (isLockedFree) {
-      alert('This is a demo account. Please contact us to upgrade to a paid plan.');
-      return;
-    }
-    
-    // If free plan, just show message
-    if (planId === 'free') {
-      alert('You are already on the free plan!');
+      setNotice({
+        kind: "error",
+        text: "This is a demo account and cannot complete a payment. Please contact support.",
+      });
       return;
     }
 
-    // For paid plans, create checkout session
-    setIsLoading(planId);
-    
+    setNotice(null);
+    setIsLoading(true);
+
     try {
-      const response = await fetch('/api/subscription/checkout', {
-        method: 'POST',
+      const response = await fetch("/api/subscription/checkout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ plan: planId }),
+        body: JSON.stringify({ mode: "payment" }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
+        if (response.status === 503) {
+          setNotice({
+            kind: "info",
+            text:
+              "Payments are not configured yet. Billing is managed by the product owner — please check back later, or contact support.",
+          });
+        } else {
+          setNotice({
+            kind: "error",
+            text: data.error || "Could not start checkout. Please try again.",
+          });
+        }
+        return;
       }
 
-      // Redirect to Stripe checkout
+      // Redirect to the real Stripe Checkout page.
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        throw new Error("Checkout did not return a payment URL.");
       }
     } catch (error: any) {
-      console.error('Checkout error:', error);
-      alert(error.message || 'Failed to start checkout. Please try again.');
-      setIsLoading(null);
+      console.error("Checkout error:", error);
+      setNotice({
+        kind: "error",
+        text: error?.message || "Could not start checkout. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const plans = [
-    {
-      name: "Free",
-      icon: Sparkles,
-      price: "$0",
-      period: "Forever",
-      description: "Perfect for testing and learning",
-      color: "from-gray-500 to-gray-600",
-      features: [
-        "3 recipes",
-        "5 orders per month",
-        "10 customers",
-        "20 products in inventory",
-        "Basic cost calculator",
-        "Community support"
-      ],
-      limitations: [
-        "No AI features",
-        "No advanced analytics",
-        "No automation",
-        "No barcode generation",
-        "No team collaboration"
-      ],
-      cta: "Get Started Free",
-      popular: false,
-      badge: null,
-      spotsLeft: null,
-      savings: null,
-      originalPrice: null,
-      subtext: null
-    },
-    {
-      name: "Starter",
-      icon: Zap,
-      price: "$29",
-      period: "per month",
-      description: "Great for small businesses getting started",
-      color: "from-blue-600 to-indigo-600",
-      features: [
-        "50 recipes",
-        "100 orders per month",
-        "200 customers",
-        "200 products",
-        "Full cost calculator & pricing wizard",
-        "Basic AI features included",
-        "Production planning",
-        "Invoice generation",
-        "Barcode & QR code generation",
-        "Email support (48h response)",
-        "Recipe templates"
-      ],
-      limitations: [
-        "Single user account",
-        "No automation",
-        "No advanced analytics"
-      ],
-      cta: "Start 14-Day Trial",
-      popular: true,
-      badge: "MOST POPULAR",
-      spotsLeft: null,
-      savings: null,
-      originalPrice: null,
-      subtext: null
-    },
-    {
-      name: "Pro",
-      icon: Crown,
-      price: "$79",
-      period: "per month",
-      description: "For growing businesses that need full features",
-      color: "from-purple-600 to-pink-600",
-      features: [
-        "✨ Everything Unlimited",
-        "Unlimited recipes, orders, customers",
-        "Unlimited products & inventory",
-        "Full AI-powered features",
-        "Advanced analytics & reporting",
-        "Automation workflows",
-        "Supplier management",
-        "Quality control system",
-        "Production scheduling",
-        "AI scent blending",
-        "AI business insights",
-        "Priority support (24h response)",
-        "Advanced integrations"
-      ],
-      limitations: [
-        "Single user account",
-        "No API access"
-      ],
-      cta: "Start 14-Day Trial",
-      popular: false,
-      badge: null,
-      spotsLeft: null,
-      savings: null,
-      originalPrice: null,
-      subtext: null
-    },
-    {
-      name: "Business",
-      icon: Building2,
-      price: "$149",
-      period: "per month",
-      description: "Enterprise features for scaling operations",
-      color: "from-amber-500 to-orange-600",
-      features: [
-        "Everything in Pro, plus:",
-        "Multi-user access (up to 10 users)",
-        "Team collaboration & roles",
-        "Customer portal",
-        "API access",
-        "White-label options",
-        "E-commerce integration",
-        "Custom domain",
-        "Advanced security",
-        "Dedicated account manager",
-        "Custom training",
-        "24/7 priority support",
-        "SLA guarantee",
-        "Advanced automation workflows",
-        "Custom branding on invoices & documents",
-        "🎁 FREE Beginner's Masterclass ($297 value)",
-        "Priority access to new features",
-        "Data export & API access"
-      ],
-      limitations: [],
-      cta: "Start 14-Day Trial",
-      popular: false,
-      badge: "Best for Teams",
-      spotsLeft: "289 spots remaining",
-      savings: "Save $600 first year",
-      originalPrice: null,
-      subtext: null
-    },
-    {
-      name: "Enterprise",
-      icon: GraduationCap,
-      price: "Custom",
-      period: "Contact us",
-      description: "For large operations & candle academies",
-      color: "from-pink-600 to-rose-600",
-      features: [
-        "Everything in Business, plus:",
-        "Unlimited team members",
-        "🚀 UNLIMITED AI social media posts",
-        "All platforms (FB, IG, LinkedIn, Twitter)",
-        "Multi-brand voice profiles",
-        "Priority AI processing",
-        "Unlimited AI requests (scent blending, insights)",
-        "White-label solution available",
-        "Custom integrations & API access",
-        "Advanced security & compliance",
-        "Dedicated account manager",
-        "Phone & video call support (1h response)",
-        "On-site training available",
-        "🎁 Beginner's Masterclass ($297 value)",
-        "🎁 Cement Vessel Workshop ($497 value)",
-        "Custom feature development",
-        "SLA guarantee (99.9% uptime)",
-        "Quarterly business strategy sessions"
-      ],
-      limitations: [],
-      cta: "Contact Sales",
-      popular: false,
-      badge: "Best Value",
-      spotsLeft: null,
-      savings: null,
-      originalPrice: null,
-      subtext: null
-    }
-  ];
-
-  const addons = [
-    {
-      name: "Beginner's Masterclass",
-      price: "$297",
-      description: "Comprehensive candle-making course for all skill levels",
-      features: [
-        "10+ hours of video content",
-        "Step-by-step tutorials",
-        "Safety guidelines & best practices",
-        "Material selection guide",
-        "Troubleshooting common issues",
-        "Fragrance blending techniques",
-        "Business startup strategies",
-        "Lifetime access to content",
-        "Certificate of completion"
-      ],
-      badge: "New!",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      name: "Cement Vessel Workshop",
-      price: "$497",
-      description: "Master the art of creating custom cement candle vessels",
-      features: [
-        "5+ hours of hands-on instruction",
-        "Mold design & creation",
-        "Mixing ratios & techniques",
-        "Finishing & sealing methods",
-        "Color & texture customization",
-        "Safety & workspace setup",
-        "Material sourcing guide",
-        "Lifetime access to content",
-        "Exclusive templates & designs"
-      ],
-      badge: "Coming Soon",
-      color: "from-emerald-500 to-teal-500"
-    }
-  ];
-
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Locked demo banner */}
+    <div className="max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          Billing
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          One-time setup for your CandlePilots workspace. Plans and ongoing
+          pricing are configured by the product owner.
+        </p>
+      </div>
+
+      {/* Demo account notice */}
       {isLockedFree && (
         <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center gap-3 text-gray-700 dark:text-gray-300">
           <Lock className="w-5 h-5 flex-shrink-0" />
           <span className="text-sm font-medium">
-            You are using a <strong>Free Demo Account</strong>. To unlock paid features, please contact us to upgrade.
+            You are using a <strong>Free Demo Account</strong> and cannot
+            complete a payment. Please contact support for billing.
           </span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="text-center mb-12">
-        <Badge className="mb-4 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
-          🎯 FOUNDER LAUNCH - Limited Time Only
-        </Badge>
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 bg-clip-text text-transparent mb-4">
-          Lock In Founder Pricing Forever
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-4">
-          Join the first 1,000 candle makers to get lifetime founder pricing. Once it&apos;s gone, it&apos;s gone forever.
-        </p>
-        <div className="flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span>647 Founder spots remaining</span>
+      {/* Single honest one-time option */}
+      <Card className="border-2 border-gray-200 dark:border-gray-700 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <CreditCard className="w-6 h-6" />
+            </div>
+            <CardTitle className="text-2xl">One-time setup</CardTitle>
           </div>
-          <div>•</div>
-          <div>⏰ Offer ends in 72 hours</div>
-        </div>
-      </div>
-
-      {/* Subscription Plans */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        {plans.map((plan, index) => {
-          const Icon = plan.icon;
-          return (
-            <Card
-              key={index}
-              className={`relative border-2 ${
-                plan.popular
-                  ? "border-purple-500 shadow-2xl shadow-purple-200 dark:shadow-purple-900/50 scale-105"
-                  : "border-gray-200 dark:border-gray-700"
-              } hover:shadow-xl transition-all duration-300`}
-            >
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1">
-                    {plan.badge}
-                  </Badge>
-                </div>
-              )}
-
-              <CardHeader className={`bg-gradient-to-r ${plan.color} text-white rounded-t-lg`}>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                </div>
-                <p className="text-white/90 text-sm">{plan.description}</p>
-              </CardHeader>
-
-              <CardContent className="pt-6">
-                {/* Pricing */}
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-2">
-                    {plan.originalPrice && (
-                      <span className="text-2xl font-bold text-gray-400 line-through">
-                        {plan.originalPrice}
-                      </span>
-                    )}
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {plan.price}
-                    </span>
-                    {plan.period !== "Contact us" && (
-                      <span className="text-gray-500 dark:text-gray-400">
-                        {plan.period}
-                      </span>
-                    )}
-                  </div>
-                  {plan.subtext && (
-                    <p className="text-xs font-bold text-purple-600 dark:text-purple-400 mt-1 uppercase tracking-wide">
-                      {plan.subtext}
-                    </p>
-                  )}
-                  {plan.savings && (
-                    <Badge className="mt-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
-                      {plan.savings}
-                    </Badge>
-                  )}
-                  {plan.spotsLeft && (
-                    <p className="text-xs text-orange-600 dark:text-orange-400 mt-2 font-semibold">
-                      ⚡ {plan.spotsLeft}
-                    </p>
-                  )}
-                  {plan.period === "Contact us" && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Tailored pricing for your needs
-                    </p>
-                  )}
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => handleSelectPlan(plan.name.toLowerCase())}
-                  disabled={isLoading === plan.name.toLowerCase() || (isLockedFree && plan.name.toLowerCase() !== 'free')}
-                  className={`w-full py-3 px-6 rounded-lg font-bold transition-all mb-6 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    plan.popular && !isLockedFree
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-                      : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                  }`}
-                >
-                  {isLoading === plan.name.toLowerCase()
-                    ? "Loading..."
-                    : isLockedFree && plan.name.toLowerCase() !== 'free'
-                    ? "🔒 Contact Us to Upgrade"
-                    : plan.cta}
-                </button>
-
-                {/* Features */}
-                <div className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Limitations */}
-                {plan.limitations.length > 0 && (
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
-                      Not included:
-                    </p>
-                    <div className="space-y-2">
-                      {plan.limitations.map((limitation, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <span className="text-gray-400 text-xs mt-0.5">✕</span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {limitation}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Launch Bonuses Section */}
-      <div className="mt-16 mb-20">
-        <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 rounded-3xl p-8 md:p-12 text-white text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            🎁 Exclusive Founder Launch Bonuses
-          </h2>
-          <p className="text-xl mb-8 text-white/90">
-            Join in the next 72 hours and get these bonuses absolutely FREE
+          <p className="text-white/90 text-sm">
+            Single completion / setup fee for your workspace
           </p>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-              <div className="text-4xl mb-3">📚</div>
-              <h3 className="font-bold text-lg mb-2">Beginner&apos;s Masterclass</h3>
-              <p className="text-sm text-white/80 mb-2">10+ hours of expert training</p>
-              <p className="text-2xl font-bold">$297 Value</p>
+        </CardHeader>
+
+        <CardContent className="pt-6">
+          {/* Pricing */}
+          <div className="mb-6">
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                {configuredFeeLabel || "Set by owner"}
+              </span>
+              <span className="text-gray-500 dark:text-gray-400">one-time</span>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-              <div className="text-4xl mb-3">🗂️</div>
-              <h3 className="font-bold text-lg mb-2">50 Pro Recipe Templates</h3>
-              <p className="text-sm text-white/80 mb-2">Battle-tested formulas</p>
-              <p className="text-2xl font-bold">$147 Value</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-              <div className="text-4xl mb-3">🏭</div>
-              <h3 className="font-bold text-lg mb-2">Verified Supplier Database</h3>
-              <p className="text-sm text-white/80 mb-2">500+ trusted vendors</p>
-              <p className="text-2xl font-bold">$99 Value</p>
-            </div>
-          </div>
-          <div className="mt-8">
-            <p className="text-3xl font-bold mb-2">Total Value: $543</p>
-            <p className="text-xl text-white/90">Yours FREE when you join as a Founder Member</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Risk Elimination Section */}
-      <div className="mb-20 bg-gray-50 dark:bg-gray-900 rounded-3xl p-8 md:p-12">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Zero Risk. All Reward.</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            We&apos;re so confident you&apos;ll love CandlePilots, we&apos;ve eliminated all the risk
-          </p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">✓</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">60-Day Money Back</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Not happy? Full refund, no questions asked
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🔄</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Free Data Migration</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              We&apos;ll import all your spreadsheets for you
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🤝</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Live Onboarding Support</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Personal help during your first 30 days
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Educational Add-ons Section */}
-      <div className="mt-20">
-        <div className="text-center mb-12">
-          <Badge className="mb-4 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-            Educational Programs
-          </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent mb-4">
-            Master Your Craft
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            Take your candle-making skills to the next level with our exclusive masterclasses.
-            <br />
-            <span className="text-sm font-semibold text-purple-600 dark:text-purple-400 mt-2 inline-block">
-              ⭐ Included FREE with Professional, Business & Enterprise plans!
-            </span>
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {addons.map((addon, index) => (
-            <Card key={index} className="border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all">
-              <CardHeader className={`bg-gradient-to-r ${addon.color} text-white rounded-t-lg`}>
-                <div className="flex items-center justify-between mb-2">
-                  <CardTitle className="text-2xl">{addon.name}</CardTitle>
-                  <Badge className="bg-white/20 text-white">
-                    {addon.badge}
-                  </Badge>
-                </div>
-                <p className="text-white/90 text-sm">{addon.description}</p>
-              </CardHeader>
-
-              <CardContent className="pt-6">
-                {/* Pricing */}
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {addon.price}
-                    </span>
-                    <span className="text-gray-500 dark:text-gray-400">one-time</span>
-                  </div>
-                  <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
-                    ⭐ Or included FREE with Professional, Business & Enterprise plans
-                  </p>
-                </div>
-
-                {/* Features */}
-                <div className="space-y-3 mb-6">
-                  {addon.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  className={`w-full py-3 px-6 rounded-lg font-bold transition-all ${
-                    addon.badge === "Coming Soon"
-                      ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg"
-                  }`}
-                  disabled={addon.badge === "Coming Soon"}
-                >
-                  {addon.badge === "Coming Soon" ? "Notify Me When Available" : "Purchase Now"}
-                </button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Comparison Table */}
-      <div className="mt-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Detailed Feature Comparison
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            See exactly what&apos;s included in each plan
-          </p>
-        </div>
-
-        <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                    Feature
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
-                    Starter
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
-                    Professional
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
-                    Business
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
-                    Enterprise
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {[
-                  { feature: "Recipe Management", starter: "25", pro: "Unlimited", business: "Unlimited", enterprise: "Unlimited" },
-                  { feature: "Inventory Tracking", starter: "50 products", pro: "Unlimited", business: "Unlimited", enterprise: "Unlimited" },
-                  { feature: "Cost Calculator", starter: "✓", pro: "✓ + Wizard", business: "✓ + Wizard", enterprise: "✓ + Wizard" },
-                  { feature: "Orders per Month", starter: "20", pro: "Unlimited", business: "Unlimited", enterprise: "Unlimited" },
-                  { feature: "Production Planning", starter: "✗", pro: "✓", business: "✓", enterprise: "✓" },
-                  { feature: "Supplier Management", starter: "✗", pro: "✓", business: "✓", enterprise: "✓" },
-                  { feature: "Quality Control", starter: "✗", pro: "✓", business: "✓", enterprise: "✓" },
-                  { feature: "Barcode Generation", starter: "✗", pro: "✓", business: "✓", enterprise: "✓" },
-                  { feature: "Team Members", starter: "1", pro: "1", business: "5", enterprise: "Unlimited" },
-                  { feature: "AI Features", starter: "✗", pro: "✗", business: "30/month", enterprise: "Unlimited" },
-                  { feature: "Customer Portal", starter: "✗", pro: "✗", business: "✓", enterprise: "✓" },
-                  { feature: "E-commerce Integration", starter: "✗", pro: "✗", business: "✓", enterprise: "✓" },
-                  { feature: "Beginner's Masterclass", starter: "✗", pro: "✓ FREE", business: "✓ FREE", enterprise: "✓ FREE" },
-                  { feature: "Cement Workshop", starter: "✗", pro: "✗", business: "✗", enterprise: "✓ FREE" },
-                  { feature: "Support Response", starter: "72h", pro: "24h", business: "4h", enterprise: "1h" },
-                  { feature: "White Label", starter: "✗", pro: "✗", business: "✗", enterprise: "✓" },
-                ].map((row, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">
-                      {row.feature}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center text-gray-600 dark:text-gray-400">
-                      {row.starter}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center text-purple-600 dark:text-purple-400 font-semibold">
-                      {row.pro}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center text-gray-600 dark:text-gray-400">
-                      {row.business}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center text-gray-600 dark:text-gray-400">
-                      {row.enterprise}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
-
-      {/* FAQ Section */}
-      <div className="mt-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Frequently Asked Questions
-          </h2>
-        </div>
-
-        <div className="max-w-3xl mx-auto space-y-4">
-          {[
-            {
-              q: "Can I switch plans later?",
-              a: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate the difference."
-            },
-            {
-              q: "What happens to my data if I downgrade?",
-              a: "You can downgrade anytime. Your data is preserved, but you'll be limited to the features of your new plan. Founder pricing is locked forever regardless of plan changes."
-            },
-            {
-              q: "Are the masterclasses really included?",
-              a: "Yes! The Beginner's Masterclass ($297 value) is included FREE with Professional, Business, and Enterprise plans. The Cement Vessel Workshop is exclusive to Enterprise."
-            },
-            {
-              q: "Is the \$29 Founder price really locked forever?",
-              a: "Absolutely! Once you lock in founder pricing at \$29/mo, that rate never changes - even as we raise prices for new customers. It's our way of rewarding early supporters."
-            },
-            {
-              q: "Do you offer discounts for annual billing?",
-              a: "Yes! Save 20% when you pay annually ($182/year vs $228 monthly for Founders). Contact us for custom enterprise pricing."
-            },
-            {
-              q: "What if I'm not satisfied?",
-              a: "We offer a 60-day money-back guarantee. If CandlePilots isn't right for you, we'll refund every penny - no questions asked."
-            }
-          ].map((faq, idx) => (
-            <Card key={idx} className="p-6">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                {faq.q}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {faq.a}
+            {!configuredFeeLabel && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Display placeholder — the owner configures the price
+                (NEXT_PUBLIC_SETUP_FEE_AMOUNT).
               </p>
-            </Card>
-          ))}
-        </div>
-      </div>
+            )}
+          </div>
 
-      {/* CTA Section */}
-      <div className="mt-20 bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 rounded-2xl p-12 text-center text-white">
-        <div className="mb-6">
-          <Badge className="bg-white/20 text-white px-4 py-2 text-sm mb-4">
-            ⚡ Limited Time Offer
-          </Badge>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Don&apos;t Miss Your Chance to Lock In $29/mo Forever
-        </h2>
-        <p className="text-xl mb-2 text-white">
-          Join 353 candle makers who&apos;ve already secured founder pricing
-        </p>
-        <p className="text-lg mb-8 text-purple-100">
-          Only 647 spots remaining • Offer ends in 72 hours
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-all shadow-lg text-lg">
-            🔒 Lock In \$29/mo Forever
+          <ul className="space-y-3 mb-6">
+            {[
+              "Secure checkout processed by Stripe",
+              "One payment, no recurring charges from us",
+            ].map((feature, idx) => (
+              <li key={idx} className="flex items-start gap-2">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {feature}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Honest notice when payments are not configured */}
+          {notice && (
+            <div
+              className={`mb-4 p-3 rounded-lg text-sm ${
+                notice.kind === "error"
+                  ? "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
+                  : "bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800"
+              }`}
+            >
+              {notice.text}
+            </div>
+          )}
+
+          <button
+            onClick={handlePaySetupFee}
+            disabled={isLoading || isLockedFree}
+            className="w-full py-3 px-6 rounded-lg font-bold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Redirecting to Stripe…" : "Complete setup & pay"}
           </button>
-          <button className="bg-purple-800/50 backdrop-blur-sm text-white px-8 py-4 rounded-lg font-bold hover:bg-purple-800/70 transition-all border-2 border-white/20">
-            Schedule a Demo
-          </button>
-        </div>
-        <p className="text-sm text-white mt-6">
-          ✓ 60-day money-back guarantee • ✓ No credit card for free plan • ✓ Cancel anytime
-        </p>
-        <div className="mt-6 pt-6 border-t border-white/20">
-          <p className="text-sm text-purple-100">
-            💰 Total value with bonuses: <span className="font-bold text-white">$543 FREE</span> when you join today
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">
+            Billing is managed by the product owner. There is no multi-tier
+            subscription for launch.
           </p>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

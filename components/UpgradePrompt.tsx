@@ -10,6 +10,11 @@ interface UpgradePromptProps {
   currentLimit?: number;
 }
 
+/**
+ * Honest placeholder shown when a user hits a free-plan limit.
+ * It does not advertise fabricated plans or prices — it points to the
+ * billing page, which is owned/configured by the product owner.
+ */
 export default function UpgradePrompt({
   resourceType,
   feature,
@@ -17,19 +22,17 @@ export default function UpgradePrompt({
 }: UpgradePromptProps) {
   const getMessage = () => {
     if (feature) {
-      return `This feature is not available on your current plan. Upgrade to access ${feature}.`;
+      return `This feature is not available on your current plan. Complete setup and billing to access more.`;
     }
     if (resourceType && currentLimit !== undefined) {
-      return `You've reached your ${resourceType} limit (${currentLimit}). Upgrade your plan to create more.`;
+      return `You've reached your ${resourceType} limit (${currentLimit}). Complete setup and billing to access more.`;
     }
-    return "Upgrade your plan to unlock more features.";
+    return "Complete setup and billing to access more features.";
   };
 
-  const benefits = [
-    "Unlimited recipes and orders",
-    "AI-powered features",
-    "Advanced analytics",
-    "Priority support",
+  const notes = [
+    "Plans & pricing are configured by the product owner",
+    "One-time setup is processed securely by Stripe",
   ];
 
   return (
@@ -55,14 +58,14 @@ export default function UpgradePrompt({
         {/* Message */}
         <div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Upgrade to Continue
+            Limit Reached
           </h3>
           <p className="text-gray-600 dark:text-gray-400">{getMessage()}</p>
         </div>
 
-        {/* Benefits */}
+        {/* Honest notes */}
         <div className="space-y-2">
-          {benefits.map((benefit, index) => (
+          {notes.map((note, index) => (
             <div
               key={index}
               className="flex items-center justify-center text-sm text-gray-700 dark:text-gray-300"
@@ -78,7 +81,7 @@ export default function UpgradePrompt({
                   clipRule="evenodd"
                 />
               </svg>
-              {benefit}
+              {note}
             </div>
           ))}
         </div>
@@ -87,7 +90,7 @@ export default function UpgradePrompt({
         <div className="space-y-3">
           <Link href="/subscription-plans">
             <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105">
-              View Plans & Pricing
+              View Billing
             </Button>
           </Link>
           <Link
@@ -96,19 +99,6 @@ export default function UpgradePrompt({
           >
             Go back to dashboard
           </Link>
-        </div>
-
-        {/* Pricing Preview */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-            Plans starting at
-          </p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            $29
-            <span className="text-lg font-normal text-gray-600 dark:text-gray-400">
-              /month
-            </span>
-          </p>
         </div>
       </div>
     </Card>

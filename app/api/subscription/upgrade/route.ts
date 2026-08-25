@@ -60,23 +60,36 @@ export async function POST(request: Request) {
       });
     }
 
-    // Price IDs - these should match your Stripe dashboard
-    const priceIds: Record<string, Record<string, string>> = {
+    // Price IDs - these should be REAL Stripe Price IDs. No placeholder IDs are
+    // invented here — if the owner has not configured a plan, we say so honestly.
+    const priceIds: Record<string, Record<string, string | undefined>> = {
       starter: {
-        monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || "price_starter_monthly",
-        yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || "price_starter_yearly",
+        monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID,
+        yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID,
       },
       pro: {
-        monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || "price_pro_monthly",
-        yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || "price_pro_yearly",
+        monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
+        yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID,
       },
       business: {
-        monthly: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || "price_business_monthly",
-        yearly: process.env.STRIPE_BUSINESS_YEARLY_PRICE_ID || "price_business_yearly",
+        monthly: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID,
+        yearly: process.env.STRIPE_BUSINESS_YEARLY_PRICE_ID,
       },
     };
 
     const priceId = priceIds[plan][billingCycle || "monthly"];
+
+    if (!priceId) {
+      return NextResponse.json(
+        {
+          error: `Subscriptions are not configured yet. Set a real STRIPE_${plan.toUpperCase()}_${(
+            billingCycle || "monthly"
+          ).toUpperCase()}_PRICE_ID before enabling.`,
+          code: "PAYMENT_NOT_CONFIGURED",
+        },
+        { status: 503 }
+      );
+    }
 
     // Check if user already has a Stripe subscription
     if (business.subscription?.stripeSubscriptionId) {

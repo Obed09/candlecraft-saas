@@ -71,13 +71,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, SubscriptionLimits> = {
   },
 };
 
-export const PLAN_PRICES = {
-  free: { monthly: 0, yearly: 0 },
-  starter: { monthly: 29, yearly: 290 }, // ~$24/mo if paid yearly
-  pro: { monthly: 79, yearly: 790 }, // ~$66/mo if paid yearly
-  business: { monthly: 149, yearly: 1490 }, // ~$124/mo if paid yearly
-};
-
 export const PLAN_NAMES = {
   free: "Free",
   starter: "Starter",
