@@ -23,14 +23,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 // Mock user plan - replace with actual auth
-const USER_PLAN = "free"; // "free" | "professional" | "business" | "enterprise"
+const USER_PLAN = "free"; // "free" | "starter" | "pro" | "business"
 const POSTS_USED = 8; // Mock usage
 
 const PLAN_LIMITS = {
   free: { posts: 14, platforms: ["facebook"], aiTraining: false },
-  professional: { posts: 30, platforms: ["facebook", "instagram"], aiTraining: true },
-  business: { posts: 120, platforms: ["facebook", "instagram", "linkedin"], aiTraining: true },
-  enterprise: { posts: -1, platforms: ["facebook", "instagram", "linkedin"], aiTraining: true } // unlimited
+  pro: { posts: 30, platforms: ["facebook", "instagram"], aiTraining: true },
+  business: { posts: 120, platforms: ["facebook", "instagram", "linkedin"], aiTraining: true }
 };
 
 export default function SocialMediaPage() {
@@ -191,7 +190,7 @@ export default function SocialMediaPage() {
               <div className="grid md:grid-cols-2 gap-3 mb-4">
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span>30 posts/month on Professional (\$29)</span>
+                  <span>30 posts/month on Pro (\$29)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <CheckCircle2 className="w-4 h-4 text-green-600" />
