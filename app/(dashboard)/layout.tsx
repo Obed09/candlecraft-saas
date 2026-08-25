@@ -1,4 +1,5 @@
 import { getAppSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ChatWidget from "@/components/ChatWidget";
@@ -12,6 +13,12 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await getAppSession();
+
+  // Defensive: unauthenticated users should never see the dashboard. The
+  // middleware normally redirects first; this guards against direct access.
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
