@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { getAppSession } from "@/lib/session";
 import { PrismaClient } from "@prisma/client";
-import { getPrismaClientOptions } from "@/lib/prisma-options";
+import { buildPoolerUrl } from "@/lib/prisma-options";
 
-const prisma = new PrismaClient(getPrismaClientOptions());
+const poolerUrl = buildPoolerUrl(process.env.DATABASE_URL);
+const prisma = new PrismaClient({
+  ...(poolerUrl ? { datasourceUrl: poolerUrl } : {}),
+});
 
 export async function GET(request: Request) {
   try {

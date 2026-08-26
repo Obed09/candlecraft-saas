@@ -1,9 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { getPrismaClientOptions } from "@/lib/prisma-options";
+import { buildPoolerUrl } from "@/lib/prisma-options";
+
+const poolerUrl = buildPoolerUrl(process.env.DATABASE_URL);
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    ...getPrismaClientOptions(),
+    ...(poolerUrl ? { datasourceUrl: poolerUrl } : {}),
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 };
