@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react'
 interface Recipe {
   id: number | string
   name: string
+  description?: string
   category?: string
   profile?: string
   purpose?: string
